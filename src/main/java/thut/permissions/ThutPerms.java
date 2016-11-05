@@ -30,6 +30,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.server.permission.PermissionAPI;
 import thut.permissions.commands.CommandManager;
 import thut.permissions.util.SpawnProtector;
 
@@ -71,6 +72,7 @@ public class ThutPerms
                 "Can any player use OP commands if their group is allowed to?");
         config.save();
         MinecraftForge.EVENT_BUS.register(new SpawnProtector());
+        PermissionAPI.setPermissionHandler(new PermissionsManager());
     }
 
     @Optional.Method(modid = "worldedit")
