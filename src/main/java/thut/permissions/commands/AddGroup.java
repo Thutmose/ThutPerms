@@ -15,13 +15,13 @@ public class AddGroup extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "addGroup";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/addGroup <group>";
     }
@@ -34,7 +34,7 @@ public class AddGroup extends BaseCommand
         if (g != null) { throw new CommandException("Error, Group already exists, cannot create again."); }
         g = ThutPerms.addGroup(groupName);
         ThutPerms.savePerms();
-        sender.addChatMessage(new TextComponentString("Created group " + groupName));
+        sender.sendMessage(new TextComponentString("Created group " + groupName));
     }
 
 }

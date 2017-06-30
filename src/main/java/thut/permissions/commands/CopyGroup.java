@@ -16,13 +16,13 @@ public class CopyGroup extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "copyGroup";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/copyGroup <from> <to>";
     }
@@ -42,7 +42,7 @@ public class CopyGroup extends BaseCommand
         gTo.all = gFrom.all;
         gTo.allowedCommands.addAll(gFrom.allowedCommands);
         ThutPerms.savePerms();
-        sender.addChatMessage(new TextComponentString("Copied from " + groupFrom + " to " + groupTo));
+        sender.sendMessage(new TextComponentString("Copied from " + groupFrom + " to " + groupTo));
     }
 
 }

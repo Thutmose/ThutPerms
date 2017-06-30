@@ -18,13 +18,13 @@ public class RenameGroup extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "renameGroup";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/renameGroup <oldname> <newname>";
     }
@@ -57,6 +57,6 @@ public class RenameGroup extends BaseCommand
             ThutPerms.addToGroup(id, newName);
         }
         ThutPerms.savePerms();
-        sender.addChatMessage(new TextComponentString("Renamed group " + groupName + " to " + newName));
+        sender.sendMessage(new TextComponentString("Renamed group " + groupName + " to " + newName));
     }
 }

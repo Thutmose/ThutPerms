@@ -15,13 +15,13 @@ public class Reload extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "reloadPerms";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/reloadPerms";
     }
@@ -30,7 +30,7 @@ public class Reload extends BaseCommand
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         ThutPerms.loadPerms();
-        sender.addChatMessage(new TextComponentString("Reloaded Permissions from File"));
+        sender.sendMessage(new TextComponentString("Reloaded Permissions from File"));
     }
 
 }

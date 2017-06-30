@@ -17,13 +17,13 @@ public class RemoveGroup extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "removeGroup";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/removeGroup <name>";
     }
@@ -37,7 +37,7 @@ public class RemoveGroup extends BaseCommand
         GroupManager.instance.groups.remove(g);
         GroupManager.instance.groupNameMap.remove(groupName);
         ThutPerms.savePerms();
-        sender.addChatMessage(new TextComponentString("Removed group " + groupName));
+        sender.sendMessage(new TextComponentString("Removed group " + groupName));
     }
 
 }

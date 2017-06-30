@@ -33,8 +33,8 @@ public class SpawnProtector
         MinecraftServer server = evt.getEntityPlayer().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
-        int i = MathHelper.abs_int(pos.getX() - blockpos.getX());
-        int j = MathHelper.abs_int(pos.getZ() - blockpos.getZ());
+        int i = MathHelper.abs(pos.getX() - blockpos.getX());
+        int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
         if (k <= server.getSpawnProtectionSize())
         {
@@ -52,8 +52,8 @@ public class SpawnProtector
         MinecraftServer server = evt.getEntityPlayer().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
-        int i = MathHelper.abs_int(pos.getX() - blockpos.getX());
-        int j = MathHelper.abs_int(pos.getZ() - blockpos.getZ());
+        int i = MathHelper.abs(pos.getX() - blockpos.getX());
+        int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
         if (k <= server.getSpawnProtectionSize())
         {
@@ -75,8 +75,8 @@ public class SpawnProtector
         MinecraftServer server = evt.getEntityPlayer().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
-        int i = MathHelper.abs_int(pos.getX() - blockpos.getX());
-        int j = MathHelper.abs_int(pos.getZ() - blockpos.getZ());
+        int i = MathHelper.abs(pos.getX() - blockpos.getX());
+        int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
         if (k <= server.getSpawnProtectionSize())
         {

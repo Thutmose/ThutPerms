@@ -24,13 +24,13 @@ public class GroupInfo extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "groupInfo";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/groupInfo <player|exists|hasPerms|members|groups|listCommands|perms> <arguments>";
     }
@@ -54,16 +54,16 @@ public class GroupInfo extends BaseCommand
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
             Group current = GroupManager.instance.getPlayerGroup(profile.getId());
-            if (current == null) sender.addChatMessage(new TextComponentString(playerName + " is not in a group"));
-            else sender.addChatMessage(new TextComponentString(playerName + " is currently in " + current.name));
+            if (current == null) sender.sendMessage(new TextComponentString(playerName + " is not in a group"));
+            else sender.sendMessage(new TextComponentString(playerName + " is currently in " + current.name));
             return;
         }
         else if (args[0].equalsIgnoreCase("exists"))
         {
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
-            if (g != null) sender.addChatMessage(new TextComponentString("Group " + groupName + " exists."));
-            else sender.addChatMessage(new TextComponentString("Group " + groupName + "does not exist."));
+            if (g != null) sender.sendMessage(new TextComponentString("Group " + groupName + " exists."));
+            else sender.sendMessage(new TextComponentString("Group " + groupName + "does not exist."));
             return;
         }
         else if (args[0].equalsIgnoreCase("hasPerms"))
@@ -73,8 +73,8 @@ public class GroupInfo extends BaseCommand
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
             if (g.allowedCommands.contains(perm) || g.all)
-                sender.addChatMessage(new TextComponentString("Group " + groupName + " can use " + perm));
-            else sender.addChatMessage(new TextComponentString("Group " + groupName + " can not use " + perm));
+                sender.sendMessage(new TextComponentString("Group " + groupName + " can use " + perm));
+            else sender.sendMessage(new TextComponentString("Group " + groupName + " can not use " + perm));
             return;
         }
         else if (args[0].equalsIgnoreCase("members"))
@@ -82,34 +82,34 @@ public class GroupInfo extends BaseCommand
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
-            sender.addChatMessage(new TextComponentString("Members of Group " + groupName));
+            sender.sendMessage(new TextComponentString("Members of Group " + groupName));
             for (UUID id : g.members)
             {
                 GameProfile profile = new GameProfile(id, null);
                 profile = server.getMinecraftSessionService().fillProfileProperties(profile, true);
-                sender.addChatMessage(new TextComponentString(profile.getName()));
+                sender.sendMessage(new TextComponentString(profile.getName()));
             }
             return;
         }
         else if (args[0].equalsIgnoreCase("groups"))
         {
-            sender.addChatMessage(new TextComponentString("List of existing Groups:"));
-            sender.addChatMessage(new TextComponentString(GroupManager.instance.initial.name));
-            sender.addChatMessage(new TextComponentString(GroupManager.instance.mods.name));
+            sender.sendMessage(new TextComponentString("List of existing Groups:"));
+            sender.sendMessage(new TextComponentString(GroupManager.instance.initial.name));
+            sender.sendMessage(new TextComponentString(GroupManager.instance.mods.name));
             for (Group g : GroupManager.instance.groups)
             {
-                sender.addChatMessage(new TextComponentString(g.name));
+                sender.sendMessage(new TextComponentString(g.name));
             }
             return;
         }
         else if (args[0].equalsIgnoreCase("ListCommands"))
         {
-            sender.addChatMessage(new TextComponentString("List of existing commands:"));
+            sender.sendMessage(new TextComponentString("List of existing commands:"));
             for (ICommand command : FMLCommonHandler.instance().getMinecraftServerInstance().getCommandManager()
                     .getCommands().values())
             {
-                String name = command.getCommandName();
-                sender.addChatMessage(new TextComponentString(name + "->" + command.getClass().getName()));
+                String name = command.getName();
+                sender.sendMessage(new TextComponentString(name + "->" + command.getClass().getName()));
             }
             return;
         }
@@ -118,12 +118,12 @@ public class GroupInfo extends BaseCommand
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
-            sender.addChatMessage(new TextComponentString("List of allowed commands:"));
+            sender.sendMessage(new TextComponentString("List of allowed commands:"));
             for (String s : g.allowedCommands)
             {
-                sender.addChatMessage(new TextComponentString(s));
+                sender.sendMessage(new TextComponentString(s));
             }
-            sender.addChatMessage(new TextComponentString("all set to: " + g.all));
+            sender.sendMessage(new TextComponentString("all set to: " + g.all));
             return;
         }
     }

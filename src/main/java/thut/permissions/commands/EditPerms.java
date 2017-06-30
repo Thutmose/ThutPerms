@@ -21,13 +21,13 @@ public class EditPerms extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "editPerms";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/editPerms <group> <perm> <value> or /editPerms allowUse <optional|value>";
     }
@@ -45,7 +45,7 @@ public class EditPerms extends BaseCommand
             if (command.equalsIgnoreCase("all"))
             {
                 g.all = enable;
-                sender.addChatMessage(new TextComponentString("Set all Permission for " + groupName + " to " + enable));
+                sender.sendMessage(new TextComponentString("Set all Permission for " + groupName + " to " + enable));
                 ThutPerms.savePerms();
                 return;
             }
@@ -57,7 +57,7 @@ public class EditPerms extends BaseCommand
             {
                 g.allowedCommands.remove(command);
             }
-            sender.addChatMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
+            sender.sendMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
             ThutPerms.savePerms();
             return;
         }
@@ -81,12 +81,12 @@ public class EditPerms extends BaseCommand
                 {
                     e.printStackTrace();
                 }
-                sender.addChatMessage(new TextComponentString(
+                sender.sendMessage(new TextComponentString(
                         "Set players able to use all commands allowed for their group to " + enable));
                 ThutPerms.savePerms();
                 return;
             }
-            sender.addChatMessage(new TextComponentString(
+            sender.sendMessage(new TextComponentString(
                     "Players allowed to use all commands for group: " + ThutPerms.allCommandUse));
             return;
         }

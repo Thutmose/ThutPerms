@@ -19,13 +19,13 @@ public class EditPlayer extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "editPlayer";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/editPlayer <playername> <permission> <value>";
     }
@@ -53,7 +53,7 @@ public class EditPlayer extends BaseCommand
         {
             Player player = GroupManager.instance.playerIDMap.remove(profile.getId());
             if (player != null) GroupManager.instance.players.remove(profile.getId());
-            sender.addChatMessage(new TextComponentString("Removed personal settings for " + playerName));
+            sender.sendMessage(new TextComponentString("Removed personal settings for " + playerName));
             return;
         }
 
@@ -64,11 +64,11 @@ public class EditPlayer extends BaseCommand
             if (player == null) throw new CommandException("No custom permissions for " + playerName);
             if (all)
             {
-                sender.addChatMessage(
+                sender.sendMessage(
                         new TextComponentString("All permission state for " + playerName + " is " + player.all));
                 return;
             }
-            sender.addChatMessage(new TextComponentString(
+            sender.sendMessage(new TextComponentString(
                     "Permission for " + playerName + " is " + player.allowedCommands.contains(permission)));
             return;
         }
@@ -78,13 +78,13 @@ public class EditPlayer extends BaseCommand
         if (all)
         {
             player.all = value;
-            sender.addChatMessage(
+            sender.sendMessage(
                     new TextComponentString("All permission state for " + playerName + " set to " + player.all));
         }
         else
         {
             player.allowedCommands.add(permission);
-            sender.addChatMessage(new TextComponentString(
+            sender.sendMessage(new TextComponentString(
                     "Permission for " + playerName + " set to " + player.allowedCommands.contains(permission)));
         }
     }

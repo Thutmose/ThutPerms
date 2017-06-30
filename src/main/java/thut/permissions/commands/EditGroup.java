@@ -78,13 +78,13 @@ public class EditGroup extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "editGroup";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/editGroup";
     }
@@ -114,7 +114,7 @@ public class EditGroup extends BaseCommand
             if (old != null) old.members.remove(profile.getId());
             GroupManager.instance.groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), groupName);
-            sender.addChatMessage(new TextComponentString("Added " + playerName + " to " + groupName));
+            sender.sendMessage(new TextComponentString("Added " + playerName + " to " + groupName));
             ThutPerms.savePerms();
             return;
         }
@@ -137,7 +137,7 @@ public class EditGroup extends BaseCommand
                     }
                 }
             }
-            sender.addChatMessage(new TextComponentString("Reset Permissions for " + groupName));
+            sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
         }
@@ -156,7 +156,7 @@ public class EditGroup extends BaseCommand
                 }
             }
             g.suffix = format(arg);
-            sender.addChatMessage(new TextComponentString("Set suffix to " + g.suffix));
+            sender.sendMessage(new TextComponentString("Set suffix to " + g.suffix));
             for (UUID id : g.members)
             {
                 EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
@@ -183,7 +183,7 @@ public class EditGroup extends BaseCommand
                 }
             }
             g.prefix = format(arg);
-            sender.addChatMessage(new TextComponentString("Set prefix to " + g.prefix));
+            sender.sendMessage(new TextComponentString("Set prefix to " + g.prefix));
             for (UUID id : g.members)
             {
                 EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);

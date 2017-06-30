@@ -22,18 +22,18 @@ public abstract class BaseCommand extends CommandBase
     }
 
     @Override
-    public List<String> getCommandAliases()
+    public List<String> getAliases()
     {
-        return Lists.newArrayList(getCommandName(), getCommandName().toLowerCase(Locale.ENGLISH));
+        return Lists.newArrayList(getName(), getName().toLowerCase(Locale.ENGLISH));
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args,
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
             @Nullable BlockPos pos)
     {
         int last = args.length - 1;
         if (last >= 0 && isUsernameIndex(args,
-                last)) { return getListOfStringsMatchingLastWord(args, server.getAllUsernames()); }
+                last)) { return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()); }
         return Collections.<String> emptyList();
     }
 }

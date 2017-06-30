@@ -75,15 +75,6 @@ public class ThutPerms
         PermissionAPI.setPermissionHandler(new PermissionsManager());
     }
 
-    @Optional.Method(modid = "worldedit")
-    @EventHandler
-    public void serverAboutToStart(FMLServerStartingEvent event)
-    {
-        thut.permissions.WorldEditPermissions worldEditSupport = new thut.permissions.WorldEditPermissions();
-        com.sk89q.worldedit.forge.ForgeWorldEdit.inst.setPermissionsProvider(worldEditSupport);
-        System.out.println("REGISTERING WORLD EDIT SUPPORT");
-    }
-
     @Optional.Method(modid = "thutessentials")
     @EventHandler
     public void thutEssentialsCompat(FMLPreInitializationEvent e)
@@ -130,8 +121,8 @@ public class ThutPerms
         if (!event.getSender().getServer().isDedicatedServer()) return;
         if (event.getSender() instanceof EntityPlayer && !canUse(event.getCommand(), (EntityPlayer) event.getSender()))
         {
-            event.getSender().addChatMessage(new TextComponentString(
-                    "You do not have permission to use /" + event.getCommand().getCommandName()));
+            event.getSender().sendMessage(new TextComponentString(
+                    "You do not have permission to use /" + event.getCommand().getName()));
             event.setCanceled(true);
         }
     }

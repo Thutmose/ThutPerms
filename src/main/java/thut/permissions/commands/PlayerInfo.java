@@ -13,13 +13,13 @@ public class PlayerInfo extends BaseCommand
     }
 
     @Override
-    public String getCommandName()
+    public String getName()
     {
         return "playerInfo";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender)
+    public String getUsage(ICommandSender sender)
     {
         return "/playerInfo <player> <arguments>";
     }
