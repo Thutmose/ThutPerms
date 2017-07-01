@@ -37,11 +37,11 @@ import thut.permissions.util.SpawnProtector;
 @Mod(modid = ThutPerms.MODID, name = "Thut Permissions", version = ThutPerms.VERSION, dependencies = "after:worldedit", updateJSON = ThutPerms.UPDATEURL, acceptableRemoteVersions = "*", acceptedMinecraftVersions = ThutPerms.MCVERSIONS)
 public class ThutPerms
 {
-    public static final String MODID         = "thutperms";
-    public static final String VERSION       = "0.1.1";
+    public static final String MODID         = Reference.MODID;
+    public static final String VERSION       = Reference.VERSION;
     public static final String UPDATEURL     = "";
 
-    public final static String MCVERSIONS    = "[1.9.4, 1.12]";
+    public final static String MCVERSIONS    = "[1.9.4, 1.13]";
 
     public static boolean      allCommandUse = false;
     public static File         configFile    = null;
@@ -121,8 +121,8 @@ public class ThutPerms
         if (!event.getSender().getServer().isDedicatedServer()) return;
         if (event.getSender() instanceof EntityPlayer && !canUse(event.getCommand(), (EntityPlayer) event.getSender()))
         {
-            event.getSender().sendMessage(new TextComponentString(
-                    "You do not have permission to use /" + event.getCommand().getName()));
+            event.getSender().sendMessage(
+                    new TextComponentString("You do not have permission to use /" + event.getCommand().getName()));
             event.setCanceled(true);
         }
     }
