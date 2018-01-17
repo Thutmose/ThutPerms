@@ -11,10 +11,10 @@ import net.minecraft.command.ICommand;
 
 public abstract class PermissionsHolder
 {
-    public boolean        all             = false;
-    public Set<String>    allowedCommands = Sets.newHashSet();
-    private List<Pattern> wildCards       = Lists.newArrayList();
-    private boolean       init            = false;
+    public boolean       all             = false;
+    public Set<String>   allowedCommands = Sets.newHashSet();
+    private List<String> wildCards       = Lists.newArrayList();
+    private boolean      init            = false;
 
     private void init()
     {
@@ -23,7 +23,11 @@ public abstract class PermissionsHolder
         {
             if (s.endsWith("*"))
             {
-                wildCards.add(Pattern.compile(s));
+                wildCards.add(s);
+            }
+            else if (s.startsWith("*"))
+            {
+                wildCards.add(s.substring(1));
             }
         }
     }
@@ -32,9 +36,10 @@ public abstract class PermissionsHolder
     {
         if (all) return true;
         if (!init) init();
-        for (Pattern pattern : wildCards)
+        for (String pattern : wildCards)
         {
-            if (pattern.matcher(permission).matches()) return true;
+            if (permission.startsWith(pattern)) return true;
+            else if (permission.matches(pattern)) return true;
         }
         return allowedCommands.contains(permission);
     }
