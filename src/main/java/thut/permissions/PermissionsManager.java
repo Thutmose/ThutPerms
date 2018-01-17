@@ -36,12 +36,6 @@ public class PermissionsManager implements IPermissionHandler
     @Override
     public boolean hasPermission(GameProfile profile, String node, @Nullable IContext context)
     {
-        DefaultPermissionLevel level = getDefaultPermissionLevel(node);
-        if (level == DefaultPermissionLevel.NONE)
-        {
-            return false;
-        }
-        else if (level == DefaultPermissionLevel.ALL) { return true; }
         return GroupManager.instance.hasPermission(profile.getId(), node);
     }
 

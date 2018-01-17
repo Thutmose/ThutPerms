@@ -3,10 +3,12 @@ package thut.permissions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.common.collect.Maps;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -37,31 +39,33 @@ import thut.permissions.util.SpawnProtector;
 @Mod(modid = ThutPerms.MODID, name = "Thut Permissions", version = ThutPerms.VERSION, dependencies = "after:worldedit", updateJSON = ThutPerms.UPDATEURL, acceptableRemoteVersions = "*", acceptedMinecraftVersions = ThutPerms.MCVERSIONS)
 public class ThutPerms
 {
-    public static final String MODID         = Reference.MODID;
-    public static final String VERSION       = Reference.VERSION;
-    public static final String UPDATEURL     = "";
+    public static final String        MODID              = Reference.MODID;
+    public static final String        VERSION            = Reference.VERSION;
+    public static final String        UPDATEURL          = "";
 
-    public final static String MCVERSIONS    = "[1.9.4, 1.13]";
+    public final static String        MCVERSIONS         = "[1.9.4, 1.13]";
 
-    public static boolean      allCommandUse = false;
-    public static File         configFile    = null;
+    public static boolean             allCommandUse      = false;
+    public static File                configFile         = null;
+    public static Map<String, String> customCommandPerms = Maps.newHashMap();
 
-    static ExclusionStrategy   exclusion     = new ExclusionStrategy()
-                                             {
-                                                 @Override
-                                                 public boolean shouldSkipField(FieldAttributes f)
-                                                 {
-                                                     String name = f.getName();
-                                                     return name.equals("groupIDMap") || name.equals("groupNameMap")
-                                                             || name.equals("playerIDMap");
-                                                 }
+    static ExclusionStrategy          exclusion          = new ExclusionStrategy()
+                                                         {
+                                                             @Override
+                                                             public boolean shouldSkipField(FieldAttributes f)
+                                                             {
+                                                                 String name = f.getName();
+                                                                 return name.equals("groupIDMap")
+                                                                         || name.equals("groupNameMap")
+                                                                         || name.equals("playerIDMap");
+                                                             }
 
-                                                 @Override
-                                                 public boolean shouldSkipClass(Class<?> clazz)
-                                                 {
-                                                     return false;
-                                                 }
-                                             };
+                                                             @Override
+                                                             public boolean shouldSkipClass(Class<?> clazz)
+                                                             {
+                                                                 return false;
+                                                             }
+                                                         };
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e)
@@ -70,6 +74,14 @@ public class ThutPerms
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,
                 "Can any player use OP commands if their group is allowed to?");
+        String[] custom = config.getStringList("customCommandPerms", Configuration.CATEGORY_GENERAL,
+                new String[] { "give:minecraft.command.give" },
+                "Custom mappings for permissions, the default shows an example for the give command");
+        for (String s : custom)
+        {
+            String[] args = s.split(":");
+            customCommandPerms.put(args[0], args[1]);
+        }
         config.save();
         MinecraftForge.EVENT_BUS.register(new SpawnProtector());
         PermissionAPI.setPermissionHandler(new PermissionsManager());
@@ -238,6 +250,8 @@ public class ThutPerms
     private boolean canUse(ICommand command, EntityPlayer sender)
     {
         UUID id = sender.getUniqueID();
+        if (customCommandPerms.containsKey(command.getName())) { return GroupManager.instance.hasPermission(id,
+                customCommandPerms.get(command.getName())); }
         return GroupManager.instance.hasPermission(id, command.getClass().getName());
     }
 }
