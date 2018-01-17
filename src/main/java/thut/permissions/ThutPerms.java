@@ -57,7 +57,9 @@ public class ThutPerms
                                                                  String name = f.getName();
                                                                  return name.equals("groupIDMap")
                                                                          || name.equals("groupNameMap")
-                                                                         || name.equals("playerIDMap");
+                                                                         || name.equals("playerIDMap")
+                                                                         || name.equals("wildCards")
+                                                                         || name.equals("init");
                                                              }
 
                                                              @Override

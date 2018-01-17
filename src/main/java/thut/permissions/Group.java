@@ -9,13 +9,11 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
-public class Group
+public class Group extends PermissionsHolder
 {
     public String      name;
     public String      prefix          = "";
     public String      suffix          = "";
-    public boolean     all             = false;
-    public Set<String> allowedCommands = Sets.newHashSet();
     public Set<UUID>   members         = Sets.newHashSet();
 
     public Group(String name)
@@ -33,26 +31,5 @@ public class Group
                 }
             }
         }
-    }
-
-    public boolean hasPermission(String permission)
-    {
-        if (all) return true;
-        if (permission.endsWith("*"))
-        {
-            permission = permission.substring(0, permission.length() - 1);
-            if (permission.isEmpty()) return true;
-            for (String s : allowedCommands)
-            {
-                if (s.startsWith(permission)) return true;
-            }
-            return false;
-        }
-        return allowedCommands.contains(permission);
-    }
-
-    public boolean canUse(ICommand command)
-    {
-        return hasPermission(command.getClass().getName());
     }
 }
