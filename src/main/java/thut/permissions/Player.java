@@ -19,7 +19,18 @@ public class Player
 
     public boolean hasPermission(String permission)
     {
-        return all || allowedCommands.contains(permission);
+        if (all) return true;
+        if (permission.endsWith("*"))
+        {
+            permission = permission.substring(0, permission.length() - 1);
+            if (permission.isEmpty()) return true;
+            for (String s : allowedCommands)
+            {
+                if (s.startsWith(permission)) return true;
+            }
+            return false;
+        }
+        return allowedCommands.contains(permission);
     }
 
     public boolean canUse(ICommand command)
