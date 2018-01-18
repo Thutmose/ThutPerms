@@ -23,7 +23,7 @@ public abstract class PermissionsHolder
         {
             if (s.endsWith("*"))
             {
-                wildCards.add(s);
+                wildCards.add(s.substring(0, s.length() - 1));
             }
             else if (s.startsWith("*"))
             {
