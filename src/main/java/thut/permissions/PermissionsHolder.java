@@ -2,7 +2,6 @@ package thut.permissions;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -46,6 +45,11 @@ public abstract class PermissionsHolder
 
     public boolean canUse(ICommand command)
     {
+        if (hasPermission("command." + command.getName())) return true;
+        for (String alias : command.getAliases())
+        {
+            if (hasPermission("command." + alias)) return true;
+        }
         return hasPermission(command.getClass().getName());
     }
 
