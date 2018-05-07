@@ -12,11 +12,12 @@ public abstract class PermissionsHolder
 {
     public boolean       all             = false;
     public Set<String>   allowedCommands = Sets.newHashSet();
-    private List<String> wildCards       = Lists.newArrayList();
+    private List<String> wildCards;
     private boolean      init            = false;
 
     private void init()
     {
+        wildCards = Lists.newArrayList();
         init = true;
         for (String s : allowedCommands)
         {
@@ -34,7 +35,7 @@ public abstract class PermissionsHolder
     public boolean hasPermission(String permission)
     {
         if (all) return true;
-        if (!init) init();
+        if (!init || wildCards == null) init();
         for (String pattern : wildCards)
         {
             if (permission.startsWith(pattern)) return true;
