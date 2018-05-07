@@ -18,18 +18,13 @@ public class EditPerms extends BaseCommand
 
     public EditPerms()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "editPerms";
+        super(CommandManager.editPerms);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/editPerms <group> <perm> <value> or /editPerms allowUse <optional|value>";
+        return super.getUsage(sender) + " <group> <perm> <value> or /editPerms allowUse <optional|value>";
     }
 
     @Override

@@ -12,18 +12,7 @@ public class Reload extends BaseCommand
 
     public Reload()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "reloadPerms";
-    }
-
-    @Override
-    public String getUsage(ICommandSender sender)
-    {
-        return "/reloadPerms";
+        super(CommandManager.reload);
     }
 
     @Override

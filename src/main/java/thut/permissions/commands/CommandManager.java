@@ -7,12 +7,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -31,6 +27,17 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 public class CommandManager
 {
+    public static String addGroup    = "addGroup";
+    public static String copyGroup   = "copyGroup";
+    public static String editGroup   = "editGroup";
+    public static String editPerms   = "editPerms";
+    public static String editPlayer  = "editPlayer";
+    public static String groupInfo   = "groupInfo";
+    public static String playerInfo  = "playerInfo";
+    public static String reload      = "reloadPerms";
+    public static String removeGroup = "removeGroup";
+    public static String renameGroup = "renameGroup";
+
     public static class ClassFinder
     {
 
@@ -152,38 +159,6 @@ public class CommandManager
         }
         else if (sender instanceof TileEntityCommandBlock) { return true; }
         return sender.getName().equalsIgnoreCase("@") || sender.getName().equals("Server");
-    }
-
-    public static Map<String, List<String>> commands = Maps.newHashMap();
-
-    static
-    {
-        commands.put("colour", Lists.newArrayList("colour", "color", "col"));
-        commands.put("tpa", Lists.newArrayList("tpa"));
-        commands.put("tptoggle", Lists.newArrayList("tptoggle"));
-        commands.put("fly", Lists.newArrayList("fly"));
-        commands.put("spawn", Lists.newArrayList("spawn"));
-        commands.put("back", Lists.newArrayList("back"));
-
-        commands.put("staff", Lists.newArrayList("staff", "sc"));
-
-        commands.put("heal", Lists.newArrayList("heal"));
-        commands.put("repair", Lists.newArrayList("repair"));
-
-        // Warp related
-        commands.put("setwarp", Lists.newArrayList("setwarp"));
-        commands.put("delwarp", Lists.newArrayList("delwarp"));
-        commands.put("warp", Lists.newArrayList("warp"));
-
-        // Home related
-        commands.put("sethome", Lists.newArrayList("sethome"));
-        commands.put("delhome", Lists.newArrayList("delhome"));
-        commands.put("home", Lists.newArrayList("home"));
-
-        // Rules
-        commands.put("rules", Lists.newArrayList("rules"));
-        commands.put("addrule", Lists.newArrayList("addrule"));
-        commands.put("delrule", Lists.newArrayList("delrule"));
     }
 
     public CommandManager(FMLServerStartingEvent event)

@@ -15,18 +15,13 @@ public class RenameGroup extends BaseCommand
 {
     public RenameGroup()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "renameGroup";
+        super(CommandManager.renameGroup);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/renameGroup <oldname> <newname>";
+        return super.getUsage(sender) + " <oldname> <newname>";
     }
 
     @Override

@@ -84,6 +84,22 @@ public class ThutPerms
             String[] args = s.split(":");
             customCommandPerms.put(args[0], args[1]);
         }
+
+        for (Field f : CommandManager.class.getDeclaredFields())
+        {
+            try
+            {
+                String value = (String) f.get(null);
+                String name = f.getName();
+                f.set(config.getString(name, Configuration.CATEGORY_GENERAL, value, "Name for " + name + " command"),
+                        value);
+            }
+            catch (IllegalArgumentException | IllegalAccessException e1)
+            {
+                e1.printStackTrace();
+            }
+        }
+
         config.save();
         MinecraftForge.EVENT_BUS.register(new SpawnProtector());
         PermissionAPI.setPermissionHandler(new PermissionsManager());

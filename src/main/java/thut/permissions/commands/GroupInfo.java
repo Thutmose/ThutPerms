@@ -21,18 +21,13 @@ public class GroupInfo extends BaseCommand
 
     public GroupInfo()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "groupInfo";
+        super(CommandManager.groupInfo);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/groupInfo <player|exists|hasPerms|members|groups|listCommands|perms> <arguments>";
+        return super.getUsage(sender) + "<player|exists|hasPerms|members|groups|listCommands|perms> <arguments>";
     }
 
     /** Return whether the specified command parameter index is a username

@@ -16,18 +16,13 @@ public class EditPlayer extends BaseCommand
 
     public EditPlayer()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "editPlayer";
+        super(CommandManager.editPlayer);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/editPlayer <playername> <permission> <value>";
+        return super.getUsage(sender) + " <playername> <permission> <value>";
     }
 
     /** Return whether the specified command parameter index is a username

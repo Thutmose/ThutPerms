@@ -15,16 +15,35 @@ import net.minecraft.util.math.BlockPos;
 
 public abstract class BaseCommand extends CommandBase
 {
+    private String name;
+    List<String>   aliases = Lists.newArrayList();
 
-    public BaseCommand()
+    public BaseCommand(String name)
     {
-        // TODO Auto-generated constructor stub
+        this.name = name;
+        aliases.add(name);
+        if (!aliases.contains(getName().toLowerCase(Locale.ENGLISH)))
+        {
+            aliases.add(getName().toLowerCase(Locale.ENGLISH));
+        }
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    @Override
+    public String getUsage(ICommandSender sender)
+    {
+        return "/" + getName();
     }
 
     @Override
     public List<String> getAliases()
     {
-        return Lists.newArrayList(getName(), getName().toLowerCase(Locale.ENGLISH));
+        return aliases;
     }
 
     @Override

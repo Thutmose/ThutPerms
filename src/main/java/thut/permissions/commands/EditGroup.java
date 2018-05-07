@@ -61,6 +61,7 @@ public class EditGroup extends BaseCommand
 
     public EditGroup()
     {
+        super(CommandManager.editGroup);
         Field temp = ReflectionHelper.findField(TextFormatting.class, "formattingCode", "field_96329_z", "z");
         temp.setAccessible(true);
         for (TextFormatting format : TextFormatting.values())
@@ -78,15 +79,9 @@ public class EditGroup extends BaseCommand
     }
 
     @Override
-    public String getName()
-    {
-        return "editGroup";
-    }
-
-    @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/editGroup";
+        return super.getUsage(sender) + " <add|reset|clear|suffix|prefix> <arguments>";
     }
 
     /** Return whether the specified command parameter index is a username
@@ -138,6 +133,17 @@ public class EditGroup extends BaseCommand
                 }
             }
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
+            ThutPerms.savePerms();
+            return;
+        }
+        else if (args.length == 2 && args[1].equals("clear"))
+        {
+            String groupName = args[0];
+            Group g = ThutPerms.getGroup(groupName);
+            if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
+            g.allowedCommands.clear();
+            g.all = false;
+            sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
         }

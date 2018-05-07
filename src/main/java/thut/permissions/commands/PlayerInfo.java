@@ -10,18 +10,13 @@ public class PlayerInfo extends BaseCommand
 
     public PlayerInfo()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "playerInfo";
+        super(CommandManager.playerInfo);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/playerInfo <player> <arguments>";
+        return super.getUsage(sender) + " <player> <arguments>";
     }
 
     /** Return whether the specified command parameter index is a username

@@ -13,18 +13,13 @@ public class CopyGroup extends BaseCommand
 
     public CopyGroup()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "copyGroup";
+        super(CommandManager.copyGroup);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/copyGroup <from> <to>";
+        return super.getUsage(sender) + " <from> <to>";
     }
 
     @Override

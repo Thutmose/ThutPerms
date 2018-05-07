@@ -14,18 +14,13 @@ public class RemoveGroup extends BaseCommand
 
     public RemoveGroup()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "removeGroup";
+        super(CommandManager.removeGroup);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/removeGroup <name>";
+        return super.getUsage(sender) + " <name>";
     }
 
     @Override

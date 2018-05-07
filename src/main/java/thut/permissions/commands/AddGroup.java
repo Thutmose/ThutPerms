@@ -12,18 +12,13 @@ public class AddGroup extends BaseCommand
 {
     public AddGroup()
     {
-    }
-
-    @Override
-    public String getName()
-    {
-        return "addGroup";
+        super(CommandManager.addGroup);
     }
 
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return "/addGroup <group>";
+        return super.getUsage(sender) + " <groupname>";
     }
 
     @Override
