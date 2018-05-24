@@ -1,42 +1,72 @@
 package thut.permissions;
 
 import java.util.List;
-import java.util.Set;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import net.minecraft.command.ICommand;
 
 public abstract class PermissionsHolder
 {
-    public boolean       all             = false;
-    public Set<String>   allowedCommands = Sets.newHashSet();
-    private List<String> wildCards;
-    private boolean      init            = false;
+    public boolean           all             = false;
+    public List<String>      allowedCommands = Lists.newArrayList();
+    public List<String>      bannedCommands  = Lists.newArrayList();
+    public String            parentName      = null;
+    public PermissionsHolder parent;
+    protected List<String>   whiteWildCards;
+    protected List<String>   blackWildCards;
+    public boolean           init            = false;
 
     private void init()
     {
-        wildCards = Lists.newArrayList();
+        whiteWildCards = Lists.newArrayList();
+        blackWildCards = Lists.newArrayList();
+        if (allowedCommands == null) allowedCommands = Lists.newArrayList();
+        if (bannedCommands == null) bannedCommands = Lists.newArrayList();
         init = true;
         for (String s : allowedCommands)
         {
             if (s.endsWith("*"))
             {
-                wildCards.add(s.substring(0, s.length() - 1));
+                whiteWildCards.add(s.substring(0, s.length() - 1));
             }
             else if (s.startsWith("*"))
             {
-                wildCards.add(s.substring(1));
+                whiteWildCards.add(s.substring(1));
+            }
+        }
+        for (String s : bannedCommands)
+        {
+            if (s.endsWith("*"))
+            {
+                blackWildCards.add(s.substring(0, s.length() - 1));
+            }
+            else if (s.startsWith("*"))
+            {
+                blackWildCards.add(s.substring(1));
             }
         }
     }
 
-    public boolean hasPermission(String permission)
+    public boolean isDenied(String permission)
     {
+        if (parent != null && parent.isDenied(permission)) return true;
+        if (!init || blackWildCards == null || bannedCommands == null) init();
+        for (String pattern : blackWildCards)
+        {
+            if (permission.startsWith(pattern)) return true;
+            else if (permission.matches(pattern)) return true;
+        }
+        if (bannedCommands.contains(permission)) return true;
+        return false;
+    }
+
+    public boolean isAllowed(String permission)
+    {
+        if (parent != null && parent.isAllowed(permission)) return true;
         if (all) return true;
-        if (!init || wildCards == null) init();
-        for (String pattern : wildCards)
+        if (!init || whiteWildCards == null || allowedCommands == null) init();
+        for (String pattern : whiteWildCards)
         {
             if (permission.startsWith(pattern)) return true;
             else if (permission.matches(pattern)) return true;
@@ -44,14 +74,37 @@ public abstract class PermissionsHolder
         return allowedCommands.contains(permission);
     }
 
+    public boolean hasPermission(String permission)
+    {
+        // Check if permission is specifically denied.
+        if (isDenied(permission)) return false;
+        // check if permission is allowed.
+        return isAllowed(permission);
+    }
+
     public boolean canUse(ICommand command)
     {
-        if (hasPermission("command." + command.getName())) return true;
+        // Check if the command falls under any denied rules.
+        if (isDenied("command." + command.getName())) return false;
         for (String alias : command.getAliases())
         {
-            if (hasPermission("command." + alias)) return true;
+            if (isDenied("command." + alias)) return false;
         }
-        return hasPermission(command.getClass().getName());
+        if (ThutPerms.customCommandPerms.containsKey(command.getName())
+                && isDenied(ThutPerms.customCommandPerms.get(command.getName())))
+            return false;
+        if (isDenied(command.getClass().getName())) return false;
+
+        // Then check if it is allowed.
+        if (isAllowed("command." + command.getName())) return true;
+        for (String alias : command.getAliases())
+        {
+            if (isAllowed("command." + alias)) return true;
+        }
+        if (ThutPerms.customCommandPerms.containsKey(command.getName())
+                && isAllowed(ThutPerms.customCommandPerms.get(command.getName())))
+            return true;
+        return isAllowed(command.getClass().getName());
     }
 
 }

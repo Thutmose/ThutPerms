@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.text.TextComponentString;
 import thut.permissions.GroupManager;
 import thut.permissions.Player;
+import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
 
 public class EditPlayer extends BaseCommand
@@ -63,11 +64,12 @@ public class EditPlayer extends BaseCommand
                         new TextComponentString("All permission state for " + playerName + " is " + player.all));
                 return;
             }
+            // TODO check banned commands
             sender.sendMessage(new TextComponentString(
                     "Permission for " + playerName + " is " + player.allowedCommands.contains(permission)));
             return;
         }
-        boolean value = Boolean.getBoolean(args[2]);
+        boolean value = Boolean.parseBoolean(args[2]);
         Player player = GroupManager.instance.playerIDMap.get(profile.getId());
         if (player == null) player = GroupManager.instance.createPlayer(profile.getId());
         if (all)
@@ -78,10 +80,21 @@ public class EditPlayer extends BaseCommand
         }
         else
         {
-            player.allowedCommands.add(permission);
+            if (value)
+            {
+                player.allowedCommands.add(permission);
+                player.bannedCommands.remove(permission);
+            }
+            else
+            {
+                player.allowedCommands.remove(permission);
+                player.bannedCommands.add(permission);
+            }
             sender.sendMessage(new TextComponentString(
-                    "Permission for " + playerName + " set to " + player.allowedCommands.contains(permission)));
+                    "Permission for " + playerName + " set to " + player.hasPermission(permission)));
         }
+        player.init = false;
+        ThutPerms.savePerms();
     }
 
 }

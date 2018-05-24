@@ -26,8 +26,7 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactRightClickBlock(PlayerInteractEvent.RightClickBlock evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || canEditSpawn(evt.getEntityPlayer())
-                || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
             return;
         World world = evt.getWorld();
         MinecraftServer server = evt.getEntityPlayer().getServer();
@@ -36,7 +35,7 @@ public class SpawnProtector
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize())
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
         {
             evt.setCanceled(true);
         }
@@ -45,8 +44,7 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactRightClickItem(PlayerInteractEvent.RightClickItem evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || canEditSpawn(evt.getEntityPlayer())
-                || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
             return;
         World world = evt.getWorld();
         MinecraftServer server = evt.getEntityPlayer().getServer();
@@ -55,7 +53,7 @@ public class SpawnProtector
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize())
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
         {
             evt.setCanceled(true);
         }
@@ -68,8 +66,7 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactLeftClickBlock(PlayerInteractEvent.LeftClickBlock evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || canEditSpawn(evt.getEntityPlayer())
-                || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
             return;
         World world = evt.getWorld();
         MinecraftServer server = evt.getEntityPlayer().getServer();
@@ -78,7 +75,7 @@ public class SpawnProtector
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize())
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
         {
             evt.setCanceled(true);
         }
@@ -87,7 +84,7 @@ public class SpawnProtector
 
     private boolean canEditSpawn(EntityPlayer player)
     {
-        return GroupManager.instance.hasPermission(player.getUniqueID(), "editspawn");
+        return GroupManager.instance.hasPermission(player.getUniqueID(), "thutperms.editspawn");
     }
 
 }

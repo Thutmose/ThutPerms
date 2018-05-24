@@ -18,8 +18,10 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
+import thut.permissions.PermissionsHolder;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
 
@@ -81,7 +83,7 @@ public class EditGroup extends BaseCommand
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return super.getUsage(sender) + " <add|reset|clear|suffix|prefix> <arguments>";
+        return super.getUsage(sender) + " <add|reset|clear|!set> <arguments>";
     }
 
     /** Return whether the specified command parameter index is a username
@@ -96,6 +98,92 @@ public class EditGroup extends BaseCommand
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
+        if (args.length >= 3 && args[0].equalsIgnoreCase("!set"))
+        {
+            if (args[1].equalsIgnoreCase("parent"))
+            {
+                if (args.length != 4)
+                    throw new CommandException("useage: " + super.getUsage(sender) + " !set parent <child> <parent>");
+                String childName = args[2];
+                String parentName = args[3];
+
+                PermissionsHolder child = GroupManager.instance.groupNameMap.get(childName);
+                Group parent = GroupManager.instance.groupNameMap.get(parentName);
+
+                if (parent == null) throw new CommandException("No group with name " + parent);
+                if (child == null)
+                {
+                    sender.sendMessage(new TextComponentString(
+                            "No group with name " + childName + ", using player perm instead."));
+                    GameProfile profile = new GameProfile(null, childName);
+                    profile = TileEntitySkull.updateGameprofile(profile);
+                    if (profile.getId() == null) { throw new CommandException(
+                            "Error, cannot find profile for " + childName); }
+                    child = GroupManager.instance.getPlayerGroup(profile.getId());
+                    if (child == null) child = GroupManager.instance.createPlayer(profile.getId());
+                }
+                child.parent = parent;
+                child.parentName = parentName;
+                ThutPerms.savePerms();
+                sender.sendMessage(new TextComponentString("Set parent of " + childName + " to " + parentName));
+                return;
+            }
+            if (args.length >= 3 && (args[1].equals("suffix")))
+            {
+                String groupName = args[2];
+                Group g = ThutPerms.getGroup(groupName);
+                String arg = "";
+                if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
+                if (args.length > 3)
+                {
+                    arg = args[3];
+                    for (int i = 4; i < args.length; i++)
+                    {
+                        arg = arg + " " + args[i];
+                    }
+                }
+                g.suffix = format(arg);
+                sender.sendMessage(new TextComponentString("Set suffix to " + g.suffix));
+                for (UUID id : g.members)
+                {
+                    EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
+                    if (player != null)
+                    {
+                        player.refreshDisplayName();
+                    }
+                }
+                ThutPerms.savePerms();
+                return;
+            }
+            if (args.length >= 3 && (args[1].equals("prefix")))
+            {
+                String groupName = args[2];
+                Group g = ThutPerms.getGroup(groupName);
+                String arg = "";
+                if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
+                if (args.length > 3)
+                {
+                    arg = args[3];
+                    for (int i = 4; i < args.length; i++)
+                    {
+                        arg = arg + " " + args[i];
+                    }
+                }
+                g.prefix = format(arg);
+                sender.sendMessage(new TextComponentString("Set prefix to " + g.prefix));
+                for (UUID id : g.members)
+                {
+                    EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
+                    if (player != null)
+                    {
+                        player.refreshDisplayName();
+                    }
+                }
+                ThutPerms.savePerms();
+                return;
+            }
+        }
+
         if (args.length == 3 && args[0].equalsIgnoreCase("add"))
         {
             String groupName = args[2];
@@ -119,7 +207,9 @@ public class EditGroup extends BaseCommand
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.allowedCommands.clear();
+            g.bannedCommands.clear();
             g.all = false;
+            g.init = false;
             for (ICommand command : FMLCommonHandler.instance().getMinecraftServerInstance().getCommandManager()
                     .getCommands().values())
             {
@@ -128,8 +218,16 @@ public class EditGroup extends BaseCommand
                     CommandBase base = (CommandBase) command;
                     if (base.getRequiredPermissionLevel() <= 0)
                     {
-                        g.allowedCommands.add(command.getClass().getName());
+                        g.allowedCommands.add("command." + command.getName());
                     }
+                }
+            }
+
+            for (String node : ThutPerms.manager.getRegisteredNodes())
+            {
+                if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
+                {
+                    g.allowedCommands.add(node);
                 }
             }
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
@@ -143,61 +241,8 @@ public class EditGroup extends BaseCommand
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.allowedCommands.clear();
             g.all = false;
+            g.init = false;
             sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
-            ThutPerms.savePerms();
-            return;
-        }
-        if (args.length >= 2 && (args[0].equals("suffix")))
-        {
-            String groupName = args[1];
-            Group g = ThutPerms.getGroup(groupName);
-            String arg = "";
-            if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
-            if (args.length > 2)
-            {
-                arg = args[2];
-                for (int i = 3; i < args.length; i++)
-                {
-                    arg = arg + " " + args[i];
-                }
-            }
-            g.suffix = format(arg);
-            sender.sendMessage(new TextComponentString("Set suffix to " + g.suffix));
-            for (UUID id : g.members)
-            {
-                EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
-                if (player != null)
-                {
-                    player.refreshDisplayName();
-                }
-            }
-            ThutPerms.savePerms();
-            return;
-        }
-        if (args.length >= 2 && (args[0].equals("prefix")))
-        {
-            String groupName = args[1];
-            Group g = ThutPerms.getGroup(groupName);
-            String arg = "";
-            if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
-            if (args.length > 2)
-            {
-                arg = args[2];
-                for (int i = 3; i < args.length; i++)
-                {
-                    arg = arg + " " + args[i];
-                }
-            }
-            g.prefix = format(arg);
-            sender.sendMessage(new TextComponentString("Set prefix to " + g.prefix));
-            for (UUID id : g.members)
-            {
-                EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
-                if (player != null)
-                {
-                    player.refreshDisplayName();
-                }
-            }
             ThutPerms.savePerms();
             return;
         }

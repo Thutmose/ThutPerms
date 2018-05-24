@@ -47,13 +47,28 @@ public class GroupManager
         {
             groupIDMap.put(id, mods);
         }
-        for (Player player : players)
-        {
-            playerIDMap.put(player.id, player);
-        }
         mods.all = true;
         groupNameMap.put("default", initial);
         groupNameMap.put("mods", mods);
+        for (Player player : players)
+        {
+            playerIDMap.put(player.id, player);
+            // Set up parent.
+            if (player.parentName != null)
+            {
+                player.parent = groupNameMap.get(player.parentName);
+                if (player.parent == null) player.parentName = null;
+            }
+        }
+        // Set up parents.
+        for (Group g : groups)
+        {
+            if (g.parentName != null)
+            {
+                g.parent = groupNameMap.get(g.parentName);
+                if (g.parent == null) g.parentName = null;
+            }
+        }
     }
 
     public Player createPlayer(UUID id)
@@ -82,6 +97,10 @@ public class GroupManager
         Group g = GroupManager.instance.getPlayerGroup(id);
         Player player = GroupManager.instance.playerIDMap.get(id);
         boolean canPlayerUse = (player != null ? player.hasPermission(perm) : false);
+
+        // Check if that player is specifically denied the perm.
+        if (player != null && player.isDenied(perm)) return false;
+
         return g.hasPermission(perm) || canPlayerUse;
     }
 

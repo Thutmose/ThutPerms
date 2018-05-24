@@ -3,6 +3,7 @@ package thut.permissions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,15 +15,10 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import net.minecraft.command.ICommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.UserListOpsEntry;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -30,7 +26,6 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.permissions.commands.CommandManager;
@@ -39,35 +34,38 @@ import thut.permissions.util.SpawnProtector;
 @Mod(modid = ThutPerms.MODID, name = "Thut Permissions", version = ThutPerms.VERSION, dependencies = "after:worldedit", updateJSON = ThutPerms.UPDATEURL, acceptableRemoteVersions = "*", acceptedMinecraftVersions = ThutPerms.MCVERSIONS)
 public class ThutPerms
 {
-    public static final String        MODID              = Reference.MODID;
-    public static final String        VERSION            = Reference.VERSION;
-    public static final String        UPDATEURL          = "";
+    public static final String             MODID              = Reference.MODID;
+    public static final String             VERSION            = Reference.VERSION;
+    public static final String             UPDATEURL          = "";
 
-    public final static String        MCVERSIONS         = "[1.9.4, 1.13]";
+    public final static String             MCVERSIONS         = "[1.9.4, 1.13]";
 
-    public static boolean             allCommandUse      = false;
-    public static File                configFile         = null;
-    public static Map<String, String> customCommandPerms = Maps.newHashMap();
+    public static boolean                  allCommandUse      = false;
+    public static File                     configFile         = null;
+    public static final PermissionsManager manager            = new PermissionsManager();
+    public static Map<String, String>      customCommandPerms = Maps.newHashMap();
 
-    static ExclusionStrategy          exclusion          = new ExclusionStrategy()
-                                                         {
-                                                             @Override
-                                                             public boolean shouldSkipField(FieldAttributes f)
-                                                             {
-                                                                 String name = f.getName();
-                                                                 return name.equals("groupIDMap")
-                                                                         || name.equals("groupNameMap")
-                                                                         || name.equals("playerIDMap")
-                                                                         || name.equals("wildCards")
-                                                                         || name.equals("init");
-                                                             }
+    static ExclusionStrategy               exclusion          = new ExclusionStrategy()
+                                                              {
+                                                                  @Override
+                                                                  public boolean shouldSkipField(FieldAttributes f)
+                                                                  {
+                                                                      String name = f.getName();
+                                                                      return name.equals("groupIDMap")
+                                                                              || name.equals("groupNameMap")
+                                                                              || name.equals("playerIDMap")
+                                                                              || name.equals("whiteWildCards")
+                                                                              || name.equals("blackWildCards")
+                                                                              || name.equals("parent")
+                                                                              || name.equals("init");
+                                                                  }
 
-                                                             @Override
-                                                             public boolean shouldSkipClass(Class<?> clazz)
-                                                             {
-                                                                 return false;
-                                                             }
-                                                         };
+                                                                  @Override
+                                                                  public boolean shouldSkipClass(Class<?> clazz)
+                                                                  {
+                                                                      return false;
+                                                                  }
+                                                              };
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e)
@@ -79,6 +77,8 @@ public class ThutPerms
         String[] custom = config.getStringList("customCommandPerms", Configuration.CATEGORY_GENERAL,
                 new String[] { "give:minecraft.command.give" },
                 "Custom mappings for permissions, the default shows an example for the give command");
+        manager.SPDiabled = config.getBoolean("singleplayerdisabled", Configuration.CATEGORY_GENERAL, true,
+                "does this not do anything single player");
         for (String s : custom)
         {
             String[] args = s.split(":");
@@ -102,7 +102,8 @@ public class ThutPerms
 
         config.save();
         MinecraftForge.EVENT_BUS.register(new SpawnProtector());
-        PermissionAPI.setPermissionHandler(new PermissionsManager());
+        PermissionAPI.setPermissionHandler(manager);
+        MinecraftForge.EVENT_BUS.register(manager);
     }
 
     @Optional.Method(modid = "thutessentials")
@@ -129,67 +130,20 @@ public class ThutPerms
         }
         new CommandManager(event);
         MinecraftForge.EVENT_BUS.register(this);
+        ThutPerms.setAnyCommandUse(event.getServer(), allCommandUse);
+    }
 
-        if (allCommandUse)
+    public static void setAnyCommandUse(MinecraftServer server, boolean enable)
+    {
+        Field f = ReflectionHelper.findField(PlayerList.class, "commandsAllowedForAll", "field_72407_n", "t");
+        f.setAccessible(true);
+        try
         {
-            Field f = ReflectionHelper.findField(PlayerList.class, "commandsAllowedForAll", "field_72407_n", "t");
-            f.setAccessible(true);
-            try
-            {
-                f.set(event.getServer().getPlayerList(), true);
-            }
-            catch (IllegalArgumentException | IllegalAccessException e)
-            {
-                e.printStackTrace();
-            }
+            f.set(server.getPlayerList(), enable);
         }
-    }
-
-    @SubscribeEvent
-    void commandUseEvent(CommandEvent event)
-    {
-        if (!event.getSender().getServer().isDedicatedServer()) return;
-        if (event.getSender() instanceof EntityPlayer && !canUse(event.getCommand(), (EntityPlayer) event.getSender()))
+        catch (IllegalArgumentException | IllegalAccessException e)
         {
-            event.getSender().sendMessage(
-                    new TextComponentString("You do not have permission to use /" + event.getCommand().getName()));
-            event.setCanceled(true);
-        }
-    }
-
-    @Optional.Method(modid = "thutessentials")
-    @SubscribeEvent
-    public void NameEvent(thut.essentials.events.NameEvent evt)
-    {
-        Group g = GroupManager.instance.getPlayerGroup(evt.toName.getUniqueID());
-        if (g == null) return;
-        String name = evt.getName();
-        if (!g.prefix.isEmpty()) name = g.prefix + " " + name;
-        if (!g.suffix.isEmpty()) name = name + " " + g.suffix;
-        evt.setName(name);
-    }
-
-    @SubscribeEvent
-    public void PlayerLoggin(PlayerLoggedInEvent evt)
-    {
-        EntityPlayer entityPlayer = evt.player;
-        if (GroupManager.instance.groupIDMap.get(entityPlayer.getUniqueID()) == null)
-        {
-            UserListOpsEntry userentry = ((EntityPlayerMP) entityPlayer).mcServer.getPlayerList().getOppedPlayers()
-                    .getEntry(entityPlayer.getGameProfile());
-            if (userentry != null && userentry.getPermissionLevel() >= 4)
-            {
-                GroupManager.instance.mods.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.mods);
-                savePerms();
-            }
-            else
-            {
-                GroupManager.instance.initial.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.initial);
-                savePerms();
-            }
-            entityPlayer.refreshDisplayName();
+            e.printStackTrace();
         }
     }
 
@@ -236,12 +190,34 @@ public class ThutPerms
         try
         {
             Gson gson = new GsonBuilder().addSerializationExclusionStrategy(exclusion).setPrettyPrinting().create();
+            for (Group group : GroupManager.instance.groups)
+            {
+                Collections.sort(group.allowedCommands);
+                Collections.sort(group.bannedCommands);
+            }
+            for (Player player : GroupManager.instance.players)
+            {
+                Collections.sort(player.allowedCommands);
+                Collections.sort(player.bannedCommands);
+            }
             FileUtils.writeStringToFile(permsFile, gson.toJson(GroupManager.instance), "UTF-8");
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    @Optional.Method(modid = "thutessentials")
+    @SubscribeEvent
+    public void NameEvent(thut.essentials.events.NameEvent evt)
+    {
+        Group g = GroupManager.instance.getPlayerGroup(evt.toName.getUniqueID());
+        if (g == null) return;
+        String name = evt.getName();
+        if (!g.prefix.isEmpty()) name = g.prefix + " " + name;
+        if (!g.suffix.isEmpty()) name = name + " " + g.suffix;
+        evt.setName(name);
     }
 
     public static Group addGroup(String name)
@@ -263,13 +239,5 @@ public class ThutPerms
     public static Group getGroup(String name)
     {
         return GroupManager.instance.groupNameMap.get(name);
-    }
-
-    private boolean canUse(ICommand command, EntityPlayer sender)
-    {
-        UUID id = sender.getUniqueID();
-        if (customCommandPerms.containsKey(command.getName())) { return GroupManager.instance.hasPermission(id,
-                customCommandPerms.get(command.getName())); }
-        return GroupManager.instance.hasPermission(id, command.getClass().getName());
     }
 }

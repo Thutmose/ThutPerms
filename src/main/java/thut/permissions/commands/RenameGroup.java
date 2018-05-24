@@ -47,6 +47,7 @@ public class RenameGroup extends BaseCommand
             GroupManager.instance.groups.remove(g1);
         }
         g1.allowedCommands.addAll(g.allowedCommands);
+        g1.bannedCommands.addAll(g.bannedCommands);
         for (UUID id : g.members)
         {
             ThutPerms.addToGroup(id, newName);

@@ -1,14 +1,10 @@
 package thut.permissions.commands;
 
-import java.lang.reflect.Field;
-
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import thut.permissions.Group;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
@@ -44,13 +40,16 @@ public class EditPerms extends BaseCommand
                 ThutPerms.savePerms();
                 return;
             }
+            g.init = false;
             if (enable)
             {
                 g.allowedCommands.add(command);
+                g.bannedCommands.remove(command);
             }
             else
             {
                 g.allowedCommands.remove(command);
+                g.bannedCommands.add(command);
             }
             sender.sendMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
             ThutPerms.savePerms();
@@ -66,19 +65,10 @@ public class EditPerms extends BaseCommand
                 config.load();
                 config.get(Configuration.CATEGORY_GENERAL, "allCommandUse", enable).set(enable);
                 config.save();
-                Field f = ReflectionHelper.findField(PlayerList.class, "commandsAllowedForAll", "field_72407_n", "t");
-                f.setAccessible(true);
-                try
-                {
-                    f.set(server.getPlayerList(), enable);
-                }
-                catch (IllegalArgumentException | IllegalAccessException e)
-                {
-                    e.printStackTrace();
-                }
                 sender.sendMessage(new TextComponentString(
                         "Set players able to use all commands allowed for their group to " + enable));
                 ThutPerms.savePerms();
+                ThutPerms.setAnyCommandUse(server, enable);
                 return;
             }
             sender.sendMessage(new TextComponentString(

@@ -63,6 +63,7 @@ public class GroupInfo extends BaseCommand
         }
         else if (args[0].equalsIgnoreCase("hasPerms"))
         {
+            //TODO check banned commands
             String groupName = args[1];
             String perm = args[2];
             Group g = ThutPerms.getGroup(groupName);
