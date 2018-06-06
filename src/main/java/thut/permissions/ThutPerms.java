@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Maps;
 import com.google.gson.ExclusionStrategy;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -43,6 +45,7 @@ public class ThutPerms
     public static boolean                  allCommandUse      = false;
     public static File                     configFile         = null;
     public static final PermissionsManager manager            = new PermissionsManager();
+    public static Logger                   logger;
     public static Map<String, String>      customCommandPerms = Maps.newHashMap();
 
     static ExclusionStrategy               exclusion          = new ExclusionStrategy()
@@ -70,6 +73,7 @@ public class ThutPerms
     @EventHandler
     public void preInit(FMLPreInitializationEvent e)
     {
+        logger = e.getModLog();
         Configuration config = new Configuration(configFile = e.getSuggestedConfigurationFile());
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,
@@ -114,8 +118,9 @@ public class ThutPerms
     }
 
     @EventHandler
-    public void serverLoad(FMLServerStartingEvent event)
+    public void serverLoad(FMLServerStartedEvent event)
     {
+        manager.onServerStarted(event);
         loadPerms();
         if (GroupManager.instance.initial == null)
         {
@@ -128,6 +133,11 @@ public class ThutPerms
             GroupManager.instance.mods.all = true;
             savePerms();
         }
+    }
+
+    @EventHandler
+    public void serverLoad(FMLServerStartingEvent event)
+    {
         new CommandManager(event);
         MinecraftForge.EVENT_BUS.register(this);
         ThutPerms.setAnyCommandUse(event.getServer(), allCommandUse);

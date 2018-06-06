@@ -1,5 +1,12 @@
 package thut.permissions.commands;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.logging.log4j.Level;
+
+import com.google.common.collect.Lists;
+
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
@@ -20,7 +27,8 @@ public class EditPerms extends BaseCommand
     @Override
     public String getUsage(ICommandSender sender)
     {
-        return super.getUsage(sender) + " <group> <perm> <value> or /editPerms allowUse <optional|value>";
+        return super.getUsage(sender) + " <group> <perm> <value> or " + super.getUsage(sender)
+                + " allowUse <optional|value> or " + super.getUsage(sender) + " list";
     }
 
     @Override
@@ -75,6 +83,19 @@ public class EditPerms extends BaseCommand
                     "Players allowed to use all commands for group: " + ThutPerms.allCommandUse));
             return;
         }
+        else if (args[0].equals("list"))
+        {
+            List<String> perms = Lists.newArrayList(ThutPerms.manager.getRegisteredNodes());
+            Collections.sort(perms);
+            StringBuilder builder = new StringBuilder();
+            builder.append("List of all known permissions:\n");
+            for (String s : perms)
+                builder.append(s + "\t" + ThutPerms.manager.getNodeDescription(s) + "\t"
+                        + ThutPerms.manager.getDefaultPermissionLevel(s) + "\n");
+            ThutPerms.logger.log(Level.INFO, builder.toString());
+            sender.sendMessage(new TextComponentString("Logged all registered permissions nodes."));
+        }
+        else throw new CommandException(getUsage(sender));
     }
 
 }

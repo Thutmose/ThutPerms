@@ -7,16 +7,13 @@ import java.util.UUID;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.permissions.Group;
@@ -210,19 +207,6 @@ public class EditGroup extends BaseCommand
             g.bannedCommands.clear();
             g.all = false;
             g.init = false;
-            for (ICommand command : FMLCommonHandler.instance().getMinecraftServerInstance().getCommandManager()
-                    .getCommands().values())
-            {
-                if (command instanceof CommandBase)
-                {
-                    CommandBase base = (CommandBase) command;
-                    if (base.getRequiredPermissionLevel() <= 0)
-                    {
-                        g.allowedCommands.add("command." + command.getName());
-                    }
-                }
-            }
-
             for (String node : ThutPerms.manager.getRegisteredNodes())
             {
                 if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
