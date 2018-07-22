@@ -234,7 +234,7 @@ public class ThutPerms
                 @Override
                 public boolean test(String t)
                 {
-                    return t != null && !t.isEmpty();
+                    return t == null || t.isEmpty();
                 }
             };
             for (Group group : GroupManager.instance.groups)

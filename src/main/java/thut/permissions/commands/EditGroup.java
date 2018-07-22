@@ -199,9 +199,9 @@ public class EditGroup extends BaseCommand
             ThutPerms.savePerms();
             return;
         }
-        else if (args.length == 2 && args[1].equals("reset"))
+        else if (args.length == 2 && args[0].equals("reset"))
         {
-            String groupName = args[0];
+            String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.allowedCommands.clear();
@@ -215,6 +215,7 @@ public class EditGroup extends BaseCommand
                     g.allowedCommands.add(node);
                 }
             }
+            System.out.println(g.allowedCommands);
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;

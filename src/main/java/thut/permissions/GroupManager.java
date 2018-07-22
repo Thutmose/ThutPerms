@@ -28,15 +28,6 @@ public class GroupManager
 
     public void init()
     {
-        for (Group g : groups)
-        {
-            if (g.name.isEmpty()) g.name = "unnamed" + new Random().nextFloat();
-            groupNameMap.put(g.name, g);
-            for (UUID id : g.members)
-            {
-                groupIDMap.put(id, g);
-            }
-        }
         if (initial == null) initial = new Group("default");
         for (UUID id : initial.members)
         {
@@ -46,6 +37,17 @@ public class GroupManager
         for (UUID id : mods.members)
         {
             groupIDMap.put(id, mods);
+        }
+        for (Group g : groups)
+        {
+            if (g.name.isEmpty()) g.name = "unnamed" + new Random().nextFloat();
+            groupNameMap.put(g.name, g);
+            for (UUID id : g.members)
+            {
+                initial.members.remove(id);
+                mods.members.remove(id);
+                groupIDMap.put(id, g);
+            }
         }
         mods.all = true;
         groupNameMap.put("default", initial);
