@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Maps;
 import com.google.gson.ExclusionStrategy;
@@ -46,7 +48,9 @@ public class ThutPerms
     public static boolean                  allCommandUse      = false;
     public static File                     configFile         = null;
     public static final PermissionsManager manager            = new PermissionsManager();
-    public static Logger                   logger;
+    public static Logger                   logger             = Logger.getLogger(MODID);
+    public static boolean                  debug              = false;
+    protected FileHandler                  logHandler         = null;
     public static Map<String, String>      customCommandPerms = Maps.newHashMap();
 
     static ExclusionStrategy               exclusion          = new ExclusionStrategy()
@@ -71,10 +75,34 @@ public class ThutPerms
                                                                   }
                                                               };
 
+    public ThutPerms()
+    {
+        initLogger();
+    }
+
+    private void initLogger()
+    {
+        logger.setLevel(Level.ALL);
+        try
+        {
+            File logfile = new File(".", "thutperms.log");
+            if ((logfile.exists() || logfile.createNewFile()) && logfile.canWrite() && logHandler == null)
+            {
+                logHandler = new FileHandler(logfile.getPath());
+                logHandler.setFormatter(new LogFormatter());
+                logger.addHandler(logHandler);
+            }
+        }
+        catch (SecurityException | IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent e)
     {
-        logger = e.getModLog();
+
         Configuration config = new Configuration(configFile = e.getSuggestedConfigurationFile());
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,

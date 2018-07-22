@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.annotation.Nullable;
 
@@ -58,6 +59,8 @@ public class PermissionsManager implements IPermissionHandler
             Thread.dumpStack();
             return getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
         }
+        if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
+                "permnode: " + node + " " + profile + " " + GroupManager.instance.hasPermission(profile.getId(), node));
         return GroupManager.instance.hasPermission(profile.getId(), node);
     }
 
@@ -142,6 +145,8 @@ public class PermissionsManager implements IPermissionHandler
 
     private boolean canUse(ICommand command, EntityPlayer sender)
     {
+        if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
+                "command use: " + command.getName() + ", " + command.getAliases() + ", " + sender.getGameProfile());
         if (GroupManager.instance.playerIDMap.containsKey(sender.getUniqueID()))
         {
             Player player = GroupManager.instance.playerIDMap.get(sender.getUniqueID());

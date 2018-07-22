@@ -2,8 +2,7 @@ package thut.permissions.commands;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.logging.log4j.Level;
+import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 
@@ -94,6 +93,11 @@ public class EditPerms extends BaseCommand
                         + ThutPerms.manager.getDefaultPermissionLevel(s) + "\n");
             ThutPerms.logger.log(Level.INFO, builder.toString());
             sender.sendMessage(new TextComponentString("Logged all registered permissions nodes."));
+        }
+        else if (args[0].equals("toggledebug"))
+        {
+            ThutPerms.debug = !ThutPerms.debug;
+            sender.sendMessage(new TextComponentString("Debug Mode set to " + ThutPerms.debug));
         }
         else throw new CommandException(getUsage(sender));
     }
