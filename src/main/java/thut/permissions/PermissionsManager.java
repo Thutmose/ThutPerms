@@ -51,6 +51,12 @@ public class PermissionsManager implements IPermissionHandler
     public boolean hasPermission(GameProfile profile, String node, @Nullable IContext context)
     {
         if (SPDiabled && FMLCommonHandler.instance().getMinecraftServerInstance().isSinglePlayer()) return true;
+        if (GroupManager.instance == null)
+        {
+            System.err.println(node + " is being checked before load!");
+            Thread.dumpStack();
+            return getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
+        }
         return GroupManager.instance.hasPermission(profile.getId(), node);
     }
 
