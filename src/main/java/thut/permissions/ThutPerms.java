@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
@@ -200,15 +201,27 @@ public class ThutPerms
         try
         {
             Gson gson = new GsonBuilder().addSerializationExclusionStrategy(exclusion).setPrettyPrinting().create();
+            Predicate<String> nonnull = new Predicate<String>()
+            {
+                @Override
+                public boolean test(String t)
+                {
+                    return t != null && !t.isEmpty();
+                }
+            };
             for (Group group : GroupManager.instance.groups)
             {
-                Collections.sort(group.allowedCommands);
-                Collections.sort(group.bannedCommands);
+                group.allowedCommands.removeIf(nonnull);
+                group.bannedCommands.removeIf(nonnull);
+                if (!group.allowedCommands.isEmpty()) Collections.sort(group.allowedCommands);
+                if (!group.bannedCommands.isEmpty()) Collections.sort(group.bannedCommands);
             }
             for (Player player : GroupManager.instance.players)
             {
-                Collections.sort(player.allowedCommands);
-                Collections.sort(player.bannedCommands);
+                player.allowedCommands.removeIf(nonnull);
+                player.bannedCommands.removeIf(nonnull);
+                if (!player.allowedCommands.isEmpty()) Collections.sort(player.allowedCommands);
+                if (!player.bannedCommands.isEmpty()) Collections.sort(player.bannedCommands);
             }
             FileUtils.writeStringToFile(permsFile, gson.toJson(GroupManager.instance), "UTF-8");
         }
