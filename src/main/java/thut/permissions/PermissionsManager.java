@@ -50,6 +50,7 @@ public class PermissionsManager implements IPermissionHandler
     @Override
     public boolean hasPermission(GameProfile profile, String node, @Nullable IContext context)
     {
+        if (FMLCommonHandler.instance().getMinecraftServerInstance() == null) return true;
         if (SPDiabled && FMLCommonHandler.instance().getMinecraftServerInstance().isSinglePlayer()) return true;
         if (GroupManager.instance == null)
         {
@@ -80,7 +81,7 @@ public class PermissionsManager implements IPermissionHandler
     public void onServerStarted(FMLServerStartedEvent event)
     {
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        if (!server.isDedicatedServer()) return;
+        if (SPDiabled && !server.isDedicatedServer()) return;
 
         GameProfile testProfile = new GameProfile(new UUID(1234567987, 123545787), "_permtest_");
         EntityPlayerMP testPlayer = new EntityPlayerMP(server, server.getWorld(0), testProfile,
@@ -105,7 +106,7 @@ public class PermissionsManager implements IPermissionHandler
     @SubscribeEvent
     void commandUseEvent(CommandEvent event)
     {
-        if (!event.getSender().getServer().isDedicatedServer()) return;
+        if (SPDiabled && !event.getSender().getServer().isDedicatedServer()) return;
         if (event.getSender() instanceof EntityPlayerMP
                 && !canUse(event.getCommand(), (EntityPlayer) event.getSender()))
         {
