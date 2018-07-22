@@ -4,6 +4,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.permissions.Group;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
@@ -28,6 +29,15 @@ public class AddGroup extends BaseCommand
         Group g = ThutPerms.getGroup(groupName);
         if (g != null) { throw new CommandException("Error, Group already exists, cannot create again."); }
         g = ThutPerms.addGroup(groupName);
+        g.all = false;
+        g.init = false;
+        for (String node : ThutPerms.manager.getRegisteredNodes())
+        {
+            if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
+            {
+                g.allowedCommands.add(node);
+            }
+        }
         ThutPerms.savePerms();
         sender.sendMessage(new TextComponentString("Created group " + groupName));
     }

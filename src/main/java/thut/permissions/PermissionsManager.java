@@ -123,7 +123,8 @@ public class PermissionsManager implements IPermissionHandler
     public void PlayerLoggin(PlayerLoggedInEvent evt)
     {
         EntityPlayer entityPlayer = evt.player;
-        if (GroupManager.instance.groupIDMap.get(entityPlayer.getUniqueID()) == null)
+        Group group = GroupManager.instance.groupIDMap.get(entityPlayer.getUniqueID());
+        if (group == null || group == GroupManager.instance.initial)
         {
             UserListOpsEntry userentry = ((EntityPlayerMP) entityPlayer).mcServer.getPlayerList().getOppedPlayers()
                     .getEntry(entityPlayer.getGameProfile());
@@ -131,9 +132,11 @@ public class PermissionsManager implements IPermissionHandler
             {
                 GroupManager.instance.mods.members.add(entityPlayer.getUniqueID());
                 GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.mods);
+                ThutPerms.logger.log(Level.INFO,
+                        "Detected " + entityPlayer.getName() + " as OP, adding to mods group.");
                 ThutPerms.savePerms();
             }
-            else
+            else if (group == null)
             {
                 GroupManager.instance.initial.members.add(entityPlayer.getUniqueID());
                 GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.initial);

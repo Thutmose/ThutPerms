@@ -186,7 +186,8 @@ public class EditGroup extends BaseCommand
             String groupName = args[2];
             String playerName = args[1];
             Group g = ThutPerms.getGroup(groupName);
-            if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
+            if (g == null) { throw new CommandException(
+                    "Error, specified Group does not exist, try: <player> <group>"); }
             GameProfile profile = new GameProfile(null, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
@@ -230,7 +231,7 @@ public class EditGroup extends BaseCommand
             ThutPerms.savePerms();
             return;
         }
-        throw new CommandException("invalid arguments");
+        throw new CommandException(getUsage(sender));
     }
 
 }

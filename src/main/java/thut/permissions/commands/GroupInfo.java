@@ -63,7 +63,7 @@ public class GroupInfo extends BaseCommand
         }
         else if (args[0].equalsIgnoreCase("hasPerms"))
         {
-            //TODO check banned commands
+            // TODO check banned commands
             String groupName = args[1];
             String perm = args[2];
             Group g = ThutPerms.getGroup(groupName);
@@ -122,6 +122,7 @@ public class GroupInfo extends BaseCommand
             sender.sendMessage(new TextComponentString("all set to: " + g.all));
             return;
         }
+        throw new CommandException(getUsage(sender));
     }
 
 }
