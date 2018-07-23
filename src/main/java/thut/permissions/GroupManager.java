@@ -49,6 +49,15 @@ public class GroupManager
                 groupIDMap.put(id, g);
             }
         }
+
+        // Refeshes players in groups to ensure that there is only 1 group with
+        // each player, this cleans up some issues with badly formatted
+        // permissions files
+        for (UUID id : groupIDMap.keySet())
+        {
+            ThutPerms.addToGroup(id, groupIDMap.get(id).name);
+        }
+
         mods.all = true;
         groupNameMap.put("default", initial);
         groupNameMap.put("mods", mods);

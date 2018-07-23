@@ -1,6 +1,9 @@
 package thut.permissions.commands;
 
+import java.util.Set;
 import java.util.UUID;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -48,7 +51,8 @@ public class RenameGroup extends BaseCommand
         }
         g1.allowedCommands.addAll(g.allowedCommands);
         g1.bannedCommands.addAll(g.bannedCommands);
-        for (UUID id : g.members)
+        Set<UUID> members = Sets.newHashSet(g.members);
+        for (UUID id : members)
         {
             ThutPerms.addToGroup(id, newName);
         }

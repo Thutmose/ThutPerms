@@ -304,6 +304,9 @@ public class ThutPerms
     {
         Group group = GroupManager.instance.groupNameMap.get(name);
         if (group == null) group = GroupManager.instance.initial;
+        // Remove from all other groups first.
+        for (Group old : GroupManager.instance.groups)
+            old.members.remove(id);
         group.members.add(id);
         GroupManager.instance.groupIDMap.put(id, group);
     }
