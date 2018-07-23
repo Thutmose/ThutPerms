@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.permissions.commands.CommandManager;
 import thut.permissions.util.SpawnProtector;
@@ -134,6 +135,11 @@ public class ThutPerms
         }
 
         config.save();
+        if (e.getSide() == Side.CLIENT && manager.SPDiabled)
+        {
+            if (debug) logger.log(Level.INFO, "Disabling on client side as set by config. (preinit)");
+            return;
+        }
         MinecraftForge.EVENT_BUS.register(new SpawnProtector());
         PermissionAPI.setPermissionHandler(manager);
         MinecraftForge.EVENT_BUS.register(manager);
@@ -143,12 +149,22 @@ public class ThutPerms
     @EventHandler
     public void thutEssentialsCompat(FMLPreInitializationEvent e)
     {
+        if (e.getSide() == Side.CLIENT && manager.SPDiabled)
+        {
+            if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (tecompat preinit)");
+            return;
+        }
         new thut.permissions.ThutEssentialsCompat();
     }
 
     @EventHandler
     public void serverLoad(FMLServerStartedEvent event)
     {
+        if (event.getSide() == Side.CLIENT && manager.SPDiabled)
+        {
+            if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (serverstarted)");
+            return;
+        }
         manager.onServerStarted(event);
         loadPerms();
         if (GroupManager.instance.initial == null)
@@ -167,6 +183,11 @@ public class ThutPerms
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event)
     {
+        if (event.getSide() == Side.CLIENT && manager.SPDiabled)
+        {
+            if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (server starting)");
+            return;
+        }
         new CommandManager(event);
         MinecraftForge.EVENT_BUS.register(this);
         ThutPerms.setAnyCommandUse(event.getServer(), allCommandUse);
