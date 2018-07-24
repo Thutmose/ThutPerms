@@ -303,8 +303,14 @@ public class ThutPerms
     public static void addToGroup(UUID id, String name)
     {
         Group group = GroupManager.instance.groupNameMap.get(name);
-        if (group == null) group = GroupManager.instance.initial;
+        if (group == null)
+        {
+            if (GroupManager.instance.mods.name.equals(name)) group = GroupManager.instance.mods;
+            else group = GroupManager.instance.initial;
+        }
         // Remove from all other groups first.
+        GroupManager.instance.initial.members.remove(id);
+        GroupManager.instance.mods.members.remove(id);
         for (Group old : GroupManager.instance.groups)
             old.members.remove(id);
         group.members.add(id);

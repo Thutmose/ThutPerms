@@ -38,6 +38,11 @@ public class EditGroup extends BaseCommand
                 index = input.indexOf('&', index);
                 if (index < input.length() - 1 && index >= 0)
                 {
+                    if (index > 0 && input.substring(index - 1, index).equals("\\"))
+                    {
+                        index++;
+                        continue;
+                    }
                     String toReplace = input.substring(index, index + 2);
                     String num = toReplace.replace("&", "");
                     TextFormatting format = charCodeMap.get(num);
