@@ -28,7 +28,9 @@ public class RemoveGroup extends BaseCommand
     {
         String groupName = args[0];
         Group g = ThutPerms.getGroup(groupName);
-        if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
+        if (g == null) throw new CommandException("Error, specified Group does not exist.");
+        if (g == GroupManager.instance.initial || g == GroupManager.instance.mods)
+            throw new CommandException("Error, cannot remove default groups.");
         GroupManager.instance.groups.remove(g);
         GroupManager.instance.groupNameMap.remove(groupName);
         ThutPerms.savePerms();

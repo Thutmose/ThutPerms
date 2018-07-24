@@ -33,11 +33,13 @@ public class GroupManager
         {
             groupIDMap.put(id, initial);
         }
+        groupNameMap.put(initial.name, initial);
         if (mods == null) mods = new Group("mods");
         for (UUID id : mods.members)
         {
             groupIDMap.put(id, mods);
         }
+        groupNameMap.put(mods.name, mods);
         for (Group g : groups)
         {
             if (g.name.isEmpty()) g.name = "unnamed" + new Random().nextFloat();

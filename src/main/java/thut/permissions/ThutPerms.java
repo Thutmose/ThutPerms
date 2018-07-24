@@ -303,6 +303,7 @@ public class ThutPerms
     public static void addToGroup(UUID id, String name)
     {
         Group group = GroupManager.instance.groupNameMap.get(name);
+        //Default groups might not bw in the name map
         if (group == null)
         {
             if (GroupManager.instance.mods.name.equals(name)) group = GroupManager.instance.mods;
