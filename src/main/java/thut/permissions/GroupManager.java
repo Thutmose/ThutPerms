@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,7 +24,7 @@ public class GroupManager
 
     public GroupManager()
     {
-        System.out.println("Initializing Group Manager.");
+        ThutPerms.logger.log(Level.INFO, "Initializing Group Manager.");
     }
 
     public void init()

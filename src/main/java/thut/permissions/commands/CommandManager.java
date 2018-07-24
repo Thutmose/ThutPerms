@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -24,6 +25,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import thut.permissions.ThutPerms;
 
 public class CommandManager
 {
@@ -179,7 +181,7 @@ public class CommandManager
                     }
                     catch (Exception e)
                     {
-                        System.out.println("Error with " + candidateClass);
+                        ThutPerms.logger.log(Level.WARNING, "Error with " + candidateClass, e);
                     }
                     if (move != null && move.getName() != null)
                     {
@@ -187,14 +189,14 @@ public class CommandManager
                     }
                     else
                     {
-                        System.err.println(candidateClass + " is not completed.");
+                        ThutPerms.logger.log(Level.WARNING, candidateClass + " is not completed.");
                     }
                 }
             }
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            ThutPerms.logger.log(Level.WARNING, "Error finding commands", e);
         }
     }
 }

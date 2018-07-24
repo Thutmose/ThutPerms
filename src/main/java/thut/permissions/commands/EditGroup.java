@@ -220,7 +220,6 @@ public class EditGroup extends BaseCommand
                     g.allowedCommands.add(node);
                 }
             }
-            System.out.println(g.allowedCommands);
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;

@@ -55,7 +55,7 @@ public class PermissionsManager implements IPermissionHandler
         if (SPDiabled && FMLCommonHandler.instance().getMinecraftServerInstance().isSinglePlayer()) return true;
         if (GroupManager.instance == null)
         {
-            System.err.println(node + " is being checked before load!");
+            ThutPerms.logger.log(Level.WARNING, node + " is being checked before load!");
             Thread.dumpStack();
             return getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
         }
