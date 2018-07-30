@@ -62,8 +62,8 @@ public class GroupManager
         }
 
         mods.all = true;
-        groupNameMap.put("default", initial);
-        groupNameMap.put("mods", mods);
+        groupNameMap.put(initial.name, initial);
+        groupNameMap.put(mods.name, mods);
         for (Player player : players)
         {
             playerIDMap.put(player.id, player);
