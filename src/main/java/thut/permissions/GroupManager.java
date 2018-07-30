@@ -13,9 +13,9 @@ public class GroupManager
 {
     public static GroupManager instance;
 
-    public Map<UUID, Group>    groupIDMap   = Maps.newHashMap();
-    public Map<UUID, Player>   playerIDMap  = Maps.newHashMap();
-    public Map<String, Group>  groupNameMap = Maps.newHashMap();
+    public Map<UUID, Group>    _groupIDMap   = Maps.newHashMap();
+    public Map<UUID, Player>   _playerIDMap  = Maps.newHashMap();
+    public Map<String, Group>  _groupNameMap = Maps.newHashMap();
     public HashSet<Group>      groups       = Sets.newHashSet();
     public HashSet<Player>     players      = Sets.newHashSet();
 
@@ -32,46 +32,46 @@ public class GroupManager
         if (initial == null) initial = new Group("default");
         for (UUID id : initial.members)
         {
-            groupIDMap.put(id, initial);
+            _groupIDMap.put(id, initial);
         }
-        groupNameMap.put(initial.name, initial);
+        _groupNameMap.put(initial.name, initial);
         if (mods == null) mods = new Group("mods");
         for (UUID id : mods.members)
         {
-            groupIDMap.put(id, mods);
+            _groupIDMap.put(id, mods);
         }
-        groupNameMap.put(mods.name, mods);
+        _groupNameMap.put(mods.name, mods);
         for (Group g : groups)
         {
             if (g.name.isEmpty()) g.name = "unnamed" + new Random().nextFloat();
-            groupNameMap.put(g.name, g);
+            _groupNameMap.put(g.name, g);
             for (UUID id : g.members)
             {
                 initial.members.remove(id);
                 mods.members.remove(id);
-                groupIDMap.put(id, g);
+                _groupIDMap.put(id, g);
             }
         }
 
         // Refeshes players in groups to ensure that there is only 1 group with
         // each player, this cleans up some issues with badly formatted
         // permissions files
-        for (UUID id : groupIDMap.keySet())
+        for (UUID id : _groupIDMap.keySet())
         {
-            ThutPerms.addToGroup(id, groupIDMap.get(id).name);
+            ThutPerms.addToGroup(id, _groupIDMap.get(id).name);
         }
 
         mods.all = true;
-        groupNameMap.put(initial.name, initial);
-        groupNameMap.put(mods.name, mods);
+        _groupNameMap.put(initial.name, initial);
+        _groupNameMap.put(mods.name, mods);
         for (Player player : players)
         {
-            playerIDMap.put(player.id, player);
+            _playerIDMap.put(player.id, player);
             // Set up parent.
             if (player.parentName != null)
             {
-                player.parent = groupNameMap.get(player.parentName);
-                if (player.parent == null) player.parentName = null;
+                player._parent = _groupNameMap.get(player.parentName);
+                if (player._parent == null) player.parentName = null;
             }
         }
         // Set up parents.
@@ -79,8 +79,8 @@ public class GroupManager
         {
             if (g.parentName != null)
             {
-                g.parent = groupNameMap.get(g.parentName);
-                if (g.parent == null) g.parentName = null;
+                g._parent = _groupNameMap.get(g.parentName);
+                if (g._parent == null) g.parentName = null;
             }
         }
     }
@@ -90,18 +90,18 @@ public class GroupManager
         Player player = new Player();
         player.id = id;
         players.add(player);
-        playerIDMap.put(id, player);
+        _playerIDMap.put(id, player);
         return player;
     }
 
     public Group getPlayerGroup(UUID id)
     {
-        Group ret = groupIDMap.get(id);
+        Group ret = _groupIDMap.get(id);
         if (ret == null)
         {
             if (initial == null) initial = new Group("default");
             ret = initial;
-            groupIDMap.put(id, ret);
+            _groupIDMap.put(id, ret);
         }
         return ret;
     }
@@ -109,7 +109,7 @@ public class GroupManager
     public boolean hasPermission(UUID id, String perm)
     {
         Group g = GroupManager.instance.getPlayerGroup(id);
-        Player player = GroupManager.instance.playerIDMap.get(id);
+        Player player = GroupManager.instance._playerIDMap.get(id);
         boolean canPlayerUse = (player != null ? player.hasPermission(perm) : false);
 
         // Check if that player is specifically denied the perm.

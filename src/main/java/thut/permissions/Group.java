@@ -5,8 +5,6 @@ import java.util.UUID;
 
 import com.google.common.collect.Sets;
 
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-
 public class Group extends PermissionsHolder
 {
     public String    name;
@@ -17,12 +15,5 @@ public class Group extends PermissionsHolder
     public Group(String name)
     {
         this.name = name;
-        for (String node : ThutPerms.manager.getRegisteredNodes())
-        {
-            if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
-            {
-                allowedCommands.add(node);
-            }
-        }
     }
 }

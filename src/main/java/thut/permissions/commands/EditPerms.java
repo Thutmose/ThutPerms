@@ -47,7 +47,7 @@ public class EditPerms extends BaseCommand
                 ThutPerms.savePerms();
                 return;
             }
-            g.init = false;
+            g._init = false;
             if (enable)
             {
                 g.allowedCommands.add(command);

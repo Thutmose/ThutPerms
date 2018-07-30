@@ -45,7 +45,15 @@ public class GroupInfo extends BaseCommand
         if (args[0].equalsIgnoreCase("player"))
         {
             String playerName = args[1];
-            GameProfile profile = new GameProfile(null, playerName);
+            UUID id = null;
+            try
+            {
+                id = UUID.fromString(playerName);
+            }
+            catch (Exception e)
+            {
+            }
+            GameProfile profile = new GameProfile(id, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
             Group current = GroupManager.instance.getPlayerGroup(profile.getId());

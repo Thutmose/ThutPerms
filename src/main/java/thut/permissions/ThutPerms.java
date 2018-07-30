@@ -30,7 +30,6 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -60,13 +59,7 @@ public class ThutPerms
                                                                   public boolean shouldSkipField(FieldAttributes f)
                                                                   {
                                                                       String name = f.getName();
-                                                                      return name.equals("groupIDMap")
-                                                                              || name.equals("groupNameMap")
-                                                                              || name.equals("playerIDMap")
-                                                                              || name.equals("whiteWildCards")
-                                                                              || name.equals("blackWildCards")
-                                                                              || name.equals("parent")
-                                                                              || name.equals("init");
+                                                                      return name.startsWith("_");
                                                                   }
 
                                                                   @Override
@@ -154,7 +147,7 @@ public class ThutPerms
             if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (tecompat preinit)");
             return;
         }
-        new thut.permissions.ThutEssentialsCompat();
+        MinecraftForge.EVENT_BUS.register(new thut.permissions.ThutEssentialsCompat());
     }
 
     @EventHandler
@@ -280,30 +273,18 @@ public class ThutPerms
         }
     }
 
-    @Optional.Method(modid = "thutessentials")
-    @SubscribeEvent
-    public void NameEvent(thut.essentials.events.NameEvent evt)
-    {
-        Group g = GroupManager.instance.getPlayerGroup(evt.toName.getUniqueID());
-        if (g == null) return;
-        String name = evt.getName();
-        if (!g.prefix.isEmpty()) name = g.prefix + " " + name;
-        if (!g.suffix.isEmpty()) name = name + " " + g.suffix;
-        evt.setName(name);
-    }
-
     public static Group addGroup(String name)
     {
         Group ret = new Group(name);
-        GroupManager.instance.groupNameMap.put(name, ret);
+        GroupManager.instance._groupNameMap.put(name, ret);
         GroupManager.instance.groups.add(ret);
         return ret;
     }
 
     public static void addToGroup(UUID id, String name)
     {
-        Group group = GroupManager.instance.groupNameMap.get(name);
-        //Default groups might not bw in the name map
+        Group group = GroupManager.instance._groupNameMap.get(name);
+        // Default groups might not bw in the name map
         if (group == null)
         {
             if (GroupManager.instance.mods.name.equals(name)) group = GroupManager.instance.mods;
@@ -315,11 +296,11 @@ public class ThutPerms
         for (Group old : GroupManager.instance.groups)
             old.members.remove(id);
         group.members.add(id);
-        GroupManager.instance.groupIDMap.put(id, group);
+        GroupManager.instance._groupIDMap.put(id, group);
     }
 
     public static Group getGroup(String name)
     {
-        return GroupManager.instance.groupNameMap.get(name);
+        return GroupManager.instance._groupNameMap.get(name);
     }
 }

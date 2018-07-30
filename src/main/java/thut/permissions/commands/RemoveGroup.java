@@ -32,7 +32,7 @@ public class RemoveGroup extends BaseCommand
         if (g == GroupManager.instance.initial || g == GroupManager.instance.mods)
             throw new CommandException("Error, cannot remove default groups.");
         GroupManager.instance.groups.remove(g);
-        GroupManager.instance.groupNameMap.remove(groupName);
+        GroupManager.instance._groupNameMap.remove(groupName);
         ThutPerms.savePerms();
         sender.sendMessage(new TextComponentString("Removed group " + groupName));
     }

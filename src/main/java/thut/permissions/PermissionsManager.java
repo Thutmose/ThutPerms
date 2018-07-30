@@ -124,7 +124,7 @@ public class PermissionsManager implements IPermissionHandler
     public void PlayerLoggin(PlayerLoggedInEvent evt)
     {
         EntityPlayer entityPlayer = evt.player;
-        Group group = GroupManager.instance.groupIDMap.get(entityPlayer.getUniqueID());
+        Group group = GroupManager.instance._groupIDMap.get(entityPlayer.getUniqueID());
         if (group == null || group == GroupManager.instance.initial)
         {
             UserListOpsEntry userentry = ((EntityPlayerMP) entityPlayer).mcServer.getPlayerList().getOppedPlayers()
@@ -132,7 +132,7 @@ public class PermissionsManager implements IPermissionHandler
             if (userentry != null && userentry.getPermissionLevel() >= 4)
             {
                 GroupManager.instance.mods.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.mods);
+                GroupManager.instance._groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.mods);
                 ThutPerms.logger.log(Level.INFO,
                         "Detected " + entityPlayer.getName() + " as OP, adding to mods group.");
                 ThutPerms.savePerms();
@@ -140,7 +140,7 @@ public class PermissionsManager implements IPermissionHandler
             else if (group == null)
             {
                 GroupManager.instance.initial.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance.groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.initial);
+                GroupManager.instance._groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.initial);
                 ThutPerms.savePerms();
             }
             entityPlayer.refreshDisplayName();
@@ -151,9 +151,9 @@ public class PermissionsManager implements IPermissionHandler
     {
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
                 "command use: " + command.getName() + ", " + command.getAliases() + ", " + sender.getGameProfile());
-        if (GroupManager.instance.playerIDMap.containsKey(sender.getUniqueID()))
+        if (GroupManager.instance._playerIDMap.containsKey(sender.getUniqueID()))
         {
-            Player player = GroupManager.instance.playerIDMap.get(sender.getUniqueID());
+            Player player = GroupManager.instance._playerIDMap.get(sender.getUniqueID());
             if (player.canUse(command)) return true;
         }
         return GroupManager.instance.getPlayerGroup(sender.getUniqueID()).canUse(command);

@@ -15,7 +15,6 @@ import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
 import thut.permissions.PermissionsHolder;
@@ -109,22 +108,30 @@ public class EditGroup extends BaseCommand
                 String childName = args[2];
                 String parentName = args[3];
 
-                PermissionsHolder child = GroupManager.instance.groupNameMap.get(childName);
-                Group parent = GroupManager.instance.groupNameMap.get(parentName);
+                PermissionsHolder child = GroupManager.instance._groupNameMap.get(childName);
+                Group parent = GroupManager.instance._groupNameMap.get(parentName);
 
                 if (parent == null) throw new CommandException("No group with name " + parent);
                 if (child == null)
                 {
                     sender.sendMessage(new TextComponentString(
                             "No group with name " + childName + ", using player perm instead."));
-                    GameProfile profile = new GameProfile(null, childName);
+                    UUID id = null;
+                    try
+                    {
+                        id = UUID.fromString(childName);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                    GameProfile profile = new GameProfile(id, childName);
                     profile = TileEntitySkull.updateGameprofile(profile);
                     if (profile.getId() == null) { throw new CommandException(
                             "Error, cannot find profile for " + childName); }
                     child = GroupManager.instance.getPlayerGroup(profile.getId());
                     if (child == null) child = GroupManager.instance.createPlayer(profile.getId());
                 }
-                child.parent = parent;
+                child._parent = parent;
                 child.parentName = parentName;
                 ThutPerms.savePerms();
                 sender.sendMessage(new TextComponentString("Set parent of " + childName + " to " + parentName));
@@ -193,12 +200,20 @@ public class EditGroup extends BaseCommand
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException(
                     "Error, specified Group does not exist, try: <player> <group>"); }
-            GameProfile profile = new GameProfile(null, playerName);
+            UUID id = null;
+            try
+            {
+                id = UUID.fromString(playerName);
+            }
+            catch (Exception e)
+            {
+            }
+            GameProfile profile = new GameProfile(id, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
             Group old = GroupManager.instance.getPlayerGroup(profile.getId());
             if (old != null) old.members.remove(profile.getId());
-            GroupManager.instance.groupIDMap.remove(profile.getId());
+            GroupManager.instance._groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), groupName);
             sender.sendMessage(new TextComponentString("Added " + playerName + " to " + groupName));
             ThutPerms.savePerms();
@@ -212,14 +227,8 @@ public class EditGroup extends BaseCommand
             g.allowedCommands.clear();
             g.bannedCommands.clear();
             g.all = false;
-            g.init = false;
-            for (String node : ThutPerms.manager.getRegisteredNodes())
-            {
-                if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
-                {
-                    g.allowedCommands.add(node);
-                }
-            }
+            g._init = false;
+            g.all_non_op = true;
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
@@ -231,7 +240,7 @@ public class EditGroup extends BaseCommand
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.allowedCommands.clear();
             g.all = false;
-            g.init = false;
+            g._init = false;
             sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
             ThutPerms.savePerms();
             return;

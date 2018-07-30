@@ -37,7 +37,7 @@ public class RenameGroup extends BaseCommand
         Group g1 = ThutPerms.getGroup(newName);
         if (g1 != null) { throw new CommandException("Error, specified Group already exists."); }
         GroupManager.instance.groups.remove(g);
-        GroupManager.instance.groupNameMap.remove(groupName);
+        GroupManager.instance._groupNameMap.remove(groupName);
         g1 = ThutPerms.addGroup(newName);
         if (g == GroupManager.instance.initial)
         {

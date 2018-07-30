@@ -5,54 +5,56 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import net.minecraft.command.ICommand;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
 
 public abstract class PermissionsHolder
 {
     public boolean           all             = false;
+    public boolean           all_non_op      = true;
     public List<String>      allowedCommands = Lists.newArrayList();
     public List<String>      bannedCommands  = Lists.newArrayList();
     public String            parentName      = null;
-    public PermissionsHolder parent;
-    protected List<String>   whiteWildCards;
-    protected List<String>   blackWildCards;
-    public boolean           init            = false;
+    public PermissionsHolder _parent;
+    protected List<String>   _whiteWildCards;
+    protected List<String>   _blackWildCards;
+    public boolean           _init           = false;
 
     private void init()
     {
-        whiteWildCards = Lists.newArrayList();
-        blackWildCards = Lists.newArrayList();
+        _whiteWildCards = Lists.newArrayList();
+        _blackWildCards = Lists.newArrayList();
         if (allowedCommands == null) allowedCommands = Lists.newArrayList();
         if (bannedCommands == null) bannedCommands = Lists.newArrayList();
-        init = true;
+        _init = true;
         for (String s : allowedCommands)
         {
             if (s.endsWith("*"))
             {
-                whiteWildCards.add(s.substring(0, s.length() - 1));
+                _whiteWildCards.add(s.substring(0, s.length() - 1));
             }
             else if (s.startsWith("*"))
             {
-                whiteWildCards.add(s.substring(1));
+                _whiteWildCards.add(s.substring(1));
             }
         }
         for (String s : bannedCommands)
         {
             if (s.endsWith("*"))
             {
-                blackWildCards.add(s.substring(0, s.length() - 1));
+                _blackWildCards.add(s.substring(0, s.length() - 1));
             }
             else if (s.startsWith("*"))
             {
-                blackWildCards.add(s.substring(1));
+                _blackWildCards.add(s.substring(1));
             }
         }
     }
 
     public boolean isDenied(String permission)
     {
-        if (parent != null && parent.isDenied(permission)) return true;
-        if (!init || blackWildCards == null || bannedCommands == null) init();
-        for (String pattern : blackWildCards)
+        if (_parent != null && _parent.isDenied(permission)) return true;
+        if (!_init || _blackWildCards == null || bannedCommands == null) init();
+        for (String pattern : _blackWildCards)
         {
             if (permission.startsWith(pattern)) return true;
             else if (permission.matches(pattern)) return true;
@@ -63,10 +65,12 @@ public abstract class PermissionsHolder
 
     public boolean isAllowed(String permission)
     {
-        if (parent != null && parent.isAllowed(permission)) return true;
+        if (_parent != null && _parent.isAllowed(permission)) return true;
         if (all) return true;
-        if (!init || whiteWildCards == null || allowedCommands == null) init();
-        for (String pattern : whiteWildCards)
+        if (!_init || _whiteWildCards == null || allowedCommands == null) init();
+        if (all_non_op && ThutPerms.manager.getDefaultPermissionLevel(permission) == DefaultPermissionLevel.ALL)
+            return true;
+        for (String pattern : _whiteWildCards)
         {
             if (permission.startsWith(pattern)) return true;
             else if (permission.matches(pattern)) return true;

@@ -40,7 +40,7 @@ public class CopyGroup extends BaseCommand
         }
 
         gTo.all = gFrom.all;
-        gTo.init = false;
+        gTo._init = false;
         gTo.allowedCommands.addAll(gFrom.allowedCommands);
         gTo.bannedCommands.addAll(gFrom.bannedCommands);
         ThutPerms.savePerms();
