@@ -301,6 +301,8 @@ public class ThutPerms
 
     public static Group getGroup(String name)
     {
+        if (name.equals(GroupManager.instance.initial.name)) return GroupManager.instance.initial;
+        if (name.equals(GroupManager.instance.mods.name)) return GroupManager.instance.mods;
         return GroupManager.instance._groupNameMap.get(name);
     }
 }

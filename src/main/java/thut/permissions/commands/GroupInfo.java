@@ -89,8 +89,7 @@ public class GroupInfo extends BaseCommand
             sender.sendMessage(new TextComponentString("Members of Group " + groupName));
             for (UUID id : g.members)
             {
-                GameProfile profile = new GameProfile(id, null);
-                profile = server.getMinecraftSessionService().fillProfileProperties(profile, true);
+                GameProfile profile = getProfile(server, id);
                 sender.sendMessage(new TextComponentString(profile.getName()));
             }
             return;
