@@ -50,7 +50,6 @@ public class ThutPerms
     public static final PermissionsManager manager            = new PermissionsManager();
     public static Logger                   logger             = Logger.getLogger(MODID);
     public static boolean                  debug              = false;
-    protected FileHandler                  logHandler         = null;
     public static Map<String, String>      customCommandPerms = Maps.newHashMap();
 
     static ExclusionStrategy               exclusion          = new ExclusionStrategy()
@@ -76,10 +75,13 @@ public class ThutPerms
 
     private void initLogger()
     {
+        FileHandler logHandler = null;
         logger.setLevel(Level.ALL);
         try
         {
-            File logfile = new File(".", "thutperms.log");
+            File logs = new File("." + File.separator + "logs");
+            logs.mkdirs();
+            File logfile = new File(logs, MODID + ".log");
             if ((logfile.exists() || logfile.createNewFile()) && logfile.canWrite() && logHandler == null)
             {
                 logHandler = new FileHandler(logfile.getPath());
