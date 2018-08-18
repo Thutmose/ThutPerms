@@ -123,9 +123,9 @@ public class ThutPerms
                 f.set(config.getString(name, Configuration.CATEGORY_GENERAL, value, "Name for " + name + " command"),
                         value);
             }
-            catch (IllegalArgumentException | IllegalAccessException e1)
+            catch (Exception e1)
             {
-                e1.printStackTrace();
+                ThutPerms.logger.log(Level.SEVERE, "Error with " + f.getName(), e1);
             }
         }
 
