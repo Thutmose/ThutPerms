@@ -51,6 +51,7 @@ public class ThutPerms
     public static Logger                   logger             = Logger.getLogger(MODID);
     public static boolean                  debug              = false;
     public static Map<String, String>      customCommandPerms = Maps.newHashMap();
+    public static boolean                  wrapOpCommands     = true;
 
     static ExclusionStrategy               exclusion          = new ExclusionStrategy()
                                                               {
@@ -103,6 +104,8 @@ public class ThutPerms
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,
                 "Can any player use OP commands if their group is allowed to?");
+        wrapOpCommands = config.getBoolean("wrapOpCommands", Configuration.CATEGORY_GENERAL, wrapOpCommands,
+                "Should any OP command be wrapped with a non-op variant for permissions use?");
         String[] custom = config.getStringList("customCommandPerms", Configuration.CATEGORY_GENERAL,
                 new String[] { "give:minecraft.command.give" },
                 "Custom mappings for permissions, the default shows an example for the give command");
