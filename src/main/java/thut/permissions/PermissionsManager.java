@@ -70,7 +70,6 @@ public class PermissionsManager implements IPermissionHandler
         }
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
                 "permnode: " + node + " " + profile + " " + GroupManager.instance.hasPermission(profile.getId(), node));
-        Thread.dumpStack();
         return GroupManager.instance.hasPermission(profile.getId(), node);
     }
 
