@@ -47,6 +47,7 @@ public class ThutPerms
 
     public static boolean                  allCommandUse      = false;
     public static File                     configFile         = null;
+    public static File                     jsonFile           = null;
     public static final PermissionsManager manager            = new PermissionsManager();
     public static Logger                   logger             = Logger.getLogger(MODID);
     public static boolean                  debug              = false;
@@ -99,8 +100,8 @@ public class ThutPerms
     @EventHandler
     public void preInit(FMLPreInitializationEvent e)
     {
-
         Configuration config = new Configuration(configFile = e.getSuggestedConfigurationFile());
+        jsonFile = new File(configFile.getParentFile(), "thutperms.json");
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,
                 "Can any player use OP commands if their group is allowed to?");
@@ -207,19 +208,13 @@ public class ThutPerms
 
     public static void loadPerms()
     {
-        String folder = FMLCommonHandler.instance().getMinecraftServerInstance().getFolderName();
-        File file = FMLCommonHandler.instance().getSavesDirectory();
-        File saveFolder = new File(file, folder);
-        File permsFolder = new File(saveFolder, "permissions");
-        if (!permsFolder.exists()) permsFolder.mkdirs();
-        File permsFile = new File(permsFolder, "permissions.json");
-        if (permsFile.exists())
+        if (jsonFile.exists())
         {
             try
             {
                 Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(exclusion).setPrettyPrinting()
                         .create();
-                String json = FileUtils.readFileToString(permsFile, "UTF-8");
+                String json = FileUtils.readFileToString(jsonFile, "UTF-8");
                 GroupManager.instance = gson.fromJson(json, GroupManager.class);
                 GroupManager.instance.init();
                 savePerms();
@@ -227,6 +222,33 @@ public class ThutPerms
             catch (IOException e)
             {
                 e.printStackTrace();
+            }
+            return;
+        }
+        
+        // Legacy load from old location.
+        String folder = FMLCommonHandler.instance().getMinecraftServerInstance().getFolderName();
+        File file = FMLCommonHandler.instance().getSavesDirectory();
+        File saveFolder = new File(file, folder);
+        File permsFolder = new File(saveFolder, "permissions");
+        if (permsFolder.exists())
+        {
+            File permsFile = new File(permsFolder, "permissions.json");
+            if (permsFile.exists())
+            {
+                try
+                {
+                    Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(exclusion).setPrettyPrinting()
+                            .create();
+                    String json = FileUtils.readFileToString(permsFile, "UTF-8");
+                    GroupManager.instance = gson.fromJson(json, GroupManager.class);
+                    GroupManager.instance.init();
+                    savePerms();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
         else
@@ -239,12 +261,6 @@ public class ThutPerms
 
     public static void savePerms()
     {
-        String folder = FMLCommonHandler.instance().getMinecraftServerInstance().getFolderName();
-        File file = FMLCommonHandler.instance().getSavesDirectory();
-        File saveFolder = new File(file, folder);
-        File permsFolder = new File(saveFolder, "permissions");
-        if (!permsFolder.exists()) permsFolder.mkdirs();
-        File permsFile = new File(permsFolder, "permissions.json");
         try
         {
             Gson gson = new GsonBuilder().addSerializationExclusionStrategy(exclusion).setPrettyPrinting().create();
@@ -270,7 +286,7 @@ public class ThutPerms
                 if (!player.allowedCommands.isEmpty()) Collections.sort(player.allowedCommands);
                 if (!player.bannedCommands.isEmpty()) Collections.sort(player.bannedCommands);
             }
-            FileUtils.writeStringToFile(permsFile, gson.toJson(GroupManager.instance), "UTF-8");
+            FileUtils.writeStringToFile(jsonFile, gson.toJson(GroupManager.instance), "UTF-8");
         }
         catch (Exception e)
         {
