@@ -8,6 +8,9 @@ import java.util.logging.Level;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.server.MinecraftServer;
 
 public class GroupManager
 {
@@ -16,11 +19,13 @@ public class GroupManager
     public Map<UUID, Group>    _groupIDMap   = Maps.newHashMap();
     public Map<UUID, Player>   _playerIDMap  = Maps.newHashMap();
     public Map<String, Group>  _groupNameMap = Maps.newHashMap();
-    public HashSet<Group>      groups       = Sets.newHashSet();
-    public HashSet<Player>     players      = Sets.newHashSet();
+    public HashSet<Group>      groups        = Sets.newHashSet();
+    public HashSet<Player>     players       = Sets.newHashSet();
 
-    public Group               initial      = new Group("default");
-    public Group               mods         = new Group("mods");
+    public Group               initial       = new Group("default");
+    public Group               mods          = new Group("mods");
+
+    public MinecraftServer     _server;
 
     public GroupManager()
     {
@@ -99,9 +104,8 @@ public class GroupManager
         Group ret = _groupIDMap.get(id);
         if (ret == null)
         {
-            if (initial == null) initial = new Group("default");
-            ret = initial;
-            _groupIDMap.put(id, ret);
+            if (_server.getPlayerList().getOppedPlayers().getEntry(new GameProfile(id, null)) != null) { return mods; }
+            return initial;
         }
         return ret;
     }
