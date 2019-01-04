@@ -20,13 +20,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.context.IContext;
@@ -169,33 +167,6 @@ public class PermissionsManager implements IPermissionHandler
             event.getSender().sendMessage(
                     new TextComponentString("You do not have permission to use " + event.getCommand().getName()));
             event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public void PlayerLoggin(PlayerLoggedInEvent evt)
-    {
-        EntityPlayer entityPlayer = evt.player;
-        Group group = GroupManager.instance._groupIDMap.get(entityPlayer.getUniqueID());
-        if (group == null || group == GroupManager.instance.initial)
-        {
-            UserListOpsEntry userentry = ((EntityPlayerMP) entityPlayer).mcServer.getPlayerList().getOppedPlayers()
-                    .getEntry(entityPlayer.getGameProfile());
-            if (userentry != null && userentry.getPermissionLevel() >= 4)
-            {
-                GroupManager.instance.mods.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance._groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.mods);
-                ThutPerms.logger.log(Level.INFO,
-                        "Detected " + entityPlayer.getName() + " as OP, adding to mods group.");
-                ThutPerms.savePerms();
-            }
-            else if (group == null)
-            {
-                GroupManager.instance.initial.members.add(entityPlayer.getUniqueID());
-                GroupManager.instance._groupIDMap.put(entityPlayer.getUniqueID(), GroupManager.instance.initial);
-                ThutPerms.savePerms();
-            }
-            entityPlayer.refreshDisplayName();
         }
     }
 

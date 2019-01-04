@@ -225,7 +225,7 @@ public class ThutPerms
             }
             return;
         }
-        
+
         // Legacy load from old location.
         String folder = FMLCommonHandler.instance().getMinecraftServerInstance().getFolderName();
         File file = FMLCommonHandler.instance().getSavesDirectory();
@@ -305,19 +305,16 @@ public class ThutPerms
     public static void addToGroup(UUID id, String name)
     {
         Group group = GroupManager.instance._groupNameMap.get(name);
-        // Default groups might not bw in the name map
-        if (group == null)
-        {
-            if (GroupManager.instance.mods.name.equals(name)) group = GroupManager.instance.mods;
-            else group = GroupManager.instance.initial;
-        }
         // Remove from all other groups first.
         GroupManager.instance.initial.members.remove(id);
         GroupManager.instance.mods.members.remove(id);
         for (Group old : GroupManager.instance.groups)
             old.members.remove(id);
-        group.members.add(id);
-        GroupManager.instance._groupIDMap.put(id, group);
+        if (group != null)
+        {
+            group.members.add(id);
+            GroupManager.instance._groupIDMap.put(id, group);
+        }
     }
 
     public static Group getGroup(String name)

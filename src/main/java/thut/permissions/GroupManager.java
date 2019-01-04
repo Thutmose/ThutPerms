@@ -35,16 +35,8 @@ public class GroupManager
     public void init()
     {
         if (initial == null) initial = new Group("default");
-        for (UUID id : initial.members)
-        {
-            _groupIDMap.put(id, initial);
-        }
         _groupNameMap.put(initial.name, initial);
         if (mods == null) mods = new Group("mods");
-        for (UUID id : mods.members)
-        {
-            _groupIDMap.put(id, mods);
-        }
         _groupNameMap.put(mods.name, mods);
         for (Group g : groups)
         {
