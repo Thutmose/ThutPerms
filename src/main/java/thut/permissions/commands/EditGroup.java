@@ -93,6 +93,7 @@ public class EditGroup extends BaseCommand
     public boolean isUsernameIndex(String[] args, int index)
     {
         if (args[0].equalsIgnoreCase("add")) return index == 1;
+        if (args[0].equalsIgnoreCase("remove")) return index == 1;
         return false;
     }
 
@@ -216,6 +217,27 @@ public class EditGroup extends BaseCommand
             GroupManager.instance._groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), groupName);
             sender.sendMessage(new TextComponentString("Added " + playerName + " to " + groupName));
+            ThutPerms.savePerms();
+            return;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("remove"))
+        {
+            String playerName = args[1];
+            UUID id = null;
+            try
+            {
+                id = UUID.fromString(playerName);
+            }
+            catch (Exception e)
+            {
+            }
+            GameProfile profile = new GameProfile(id, playerName);
+            profile = TileEntitySkull.updateGameprofile(profile);
+            if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
+            Group old = GroupManager.instance.getPlayerGroup(profile.getId());
+            if (old != null) old.members.remove(profile.getId());
+            GroupManager.instance._groupIDMap.remove(profile.getId());
+            ThutPerms.addToGroup(profile.getId(), GroupManager.instance.initial.name);
             ThutPerms.savePerms();
             return;
         }
