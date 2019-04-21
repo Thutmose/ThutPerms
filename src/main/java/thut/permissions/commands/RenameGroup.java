@@ -49,8 +49,8 @@ public class RenameGroup extends BaseCommand
             GroupManager.instance.mods = g1;
             GroupManager.instance.groups.remove(g1);
         }
-        g1.allowedCommands.addAll(g.allowedCommands);
-        g1.bannedCommands.addAll(g.bannedCommands);
+        g1.getAllowedCommands().addAll(g.getAllowedCommands());
+        g1.getBannedCommands().addAll(g.getBannedCommands());
         Set<UUID> members = Sets.newHashSet(g.members);
         for (UUID id : members)
         {

@@ -42,6 +42,7 @@ public class GroupInfo extends BaseCommand
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
+        if (args.length == 0) throw new CommandException(getUsage(sender));
         if (args[0].equalsIgnoreCase("player"))
         {
             String playerName = args[1];
@@ -71,12 +72,11 @@ public class GroupInfo extends BaseCommand
         }
         else if (args[0].equalsIgnoreCase("hasPerms"))
         {
-            // TODO check banned commands
             String groupName = args[1];
             String perm = args[2];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
-            if (g.allowedCommands.contains(perm) || g.all)
+            if (g.hasPermission(perm))
                 sender.sendMessage(new TextComponentString("Group " + groupName + " can use " + perm));
             else sender.sendMessage(new TextComponentString("Group " + groupName + " can not use " + perm));
             return;
@@ -122,7 +122,7 @@ public class GroupInfo extends BaseCommand
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
             sender.sendMessage(new TextComponentString("List of allowed commands:"));
-            for (String s : g.allowedCommands)
+            for (String s : g.getAllowedCommands())
             {
                 sender.sendMessage(new TextComponentString(s));
             }

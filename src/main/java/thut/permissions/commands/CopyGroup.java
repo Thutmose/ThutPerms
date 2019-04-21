@@ -35,14 +35,14 @@ public class CopyGroup extends BaseCommand
         if (gTo == null) { throw new CommandException("Error, specified Group " + groupTo + " does not exist."); }
         if (replace)
         {
-            gTo.allowedCommands.clear();
-            gTo.bannedCommands.clear();
+            gTo.getAllowedCommands().clear();
+            gTo.getBannedCommands().clear();
         }
 
         gTo.all = gFrom.all;
         gTo._init = false;
-        gTo.allowedCommands.addAll(gFrom.allowedCommands);
-        gTo.bannedCommands.addAll(gFrom.bannedCommands);
+        gTo.getAllowedCommands().addAll(gFrom.getAllowedCommands());
+        gTo.getBannedCommands().addAll(gFrom.getBannedCommands());
         ThutPerms.savePerms();
         sender.sendMessage(new TextComponentString("Copied from " + groupFrom + " to " + groupTo));
     }

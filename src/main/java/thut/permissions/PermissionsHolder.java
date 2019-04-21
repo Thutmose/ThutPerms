@@ -50,6 +50,18 @@ public abstract class PermissionsHolder
         }
     }
 
+    public List<String> getAllowedCommands()
+    {
+        if (allowedCommands == null) allowedCommands = Lists.newArrayList();
+        return allowedCommands;
+    }
+
+    public List<String> getBannedCommands()
+    {
+        if (bannedCommands == null) bannedCommands = Lists.newArrayList();
+        return bannedCommands;
+    }
+
     public boolean isDenied(String permission)
     {
         if (_parent != null && _parent.isDenied(permission)) return true;

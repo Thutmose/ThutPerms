@@ -133,13 +133,13 @@ public class EditPlayer extends BaseCommand
         {
             if (value)
             {
-                player.allowedCommands.add(permission);
-                player.bannedCommands.remove(permission);
+                player.getAllowedCommands().add(permission);
+                player.getBannedCommands().remove(permission);
             }
             else
             {
-                player.allowedCommands.remove(permission);
-                player.bannedCommands.add(permission);
+                player.getAllowedCommands().remove(permission);
+                player.getBannedCommands().add(permission);
             }
             sender.sendMessage(new TextComponentString(
                     "Permission for " + playerName + " set to " + player.hasPermission(permission)));

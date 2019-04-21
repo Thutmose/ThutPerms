@@ -35,7 +35,7 @@ public class AddGroup extends BaseCommand
         {
             if (ThutPerms.manager.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL)
             {
-                g.allowedCommands.add(node);
+                g.getAllowedCommands().add(node);
             }
         }
         ThutPerms.savePerms();

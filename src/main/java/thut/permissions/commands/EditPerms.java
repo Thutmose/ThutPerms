@@ -50,13 +50,13 @@ public class EditPerms extends BaseCommand
             g._init = false;
             if (enable)
             {
-                g.allowedCommands.add(command);
-                g.bannedCommands.remove(command);
+                g.getAllowedCommands().add(command);
+                g.getBannedCommands().remove(command);
             }
             else
             {
-                g.allowedCommands.remove(command);
-                g.bannedCommands.add(command);
+                g.getAllowedCommands().remove(command);
+                g.getBannedCommands().add(command);
             }
             sender.sendMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
             ThutPerms.savePerms();

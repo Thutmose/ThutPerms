@@ -246,8 +246,8 @@ public class EditGroup extends BaseCommand
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
-            g.allowedCommands.clear();
-            g.bannedCommands.clear();
+            g.getAllowedCommands().clear();
+            g.getBannedCommands().clear();
             g.all = false;
             g._init = false;
             g.all_non_op = true;
@@ -260,7 +260,8 @@ public class EditGroup extends BaseCommand
             String groupName = args[0];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
-            g.allowedCommands.clear();
+            g.getAllowedCommands().clear();
+            g.getBannedCommands().clear();
             g.all = false;
             g._init = false;
             sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
