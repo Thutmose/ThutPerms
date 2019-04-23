@@ -36,18 +36,18 @@ public class RenameGroup extends BaseCommand
         if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
         Group g1 = ThutPerms.getGroup(newName);
         if (g1 != null) { throw new CommandException("Error, specified Group already exists."); }
-        GroupManager.instance.groups.remove(g);
-        GroupManager.instance._groupNameMap.remove(groupName);
+        GroupManager._instance.groups.remove(g);
+        GroupManager._instance._groupNameMap.remove(groupName);
         g1 = ThutPerms.addGroup(newName);
-        if (g == GroupManager.instance.initial)
+        if (g == GroupManager._instance.initial)
         {
-            GroupManager.instance.initial = g1;
-            GroupManager.instance.groups.remove(g1);
+            GroupManager._instance.initial = g1;
+            GroupManager._instance.groups.remove(g1);
         }
-        else if (g == GroupManager.instance.mods)
+        else if (g == GroupManager._instance.mods)
         {
-            GroupManager.instance.mods = g1;
-            GroupManager.instance.groups.remove(g1);
+            GroupManager._instance.mods = g1;
+            GroupManager._instance.groups.remove(g1);
         }
         g1.getAllowedCommands().addAll(g.getAllowedCommands());
         g1.getBannedCommands().addAll(g.getBannedCommands());

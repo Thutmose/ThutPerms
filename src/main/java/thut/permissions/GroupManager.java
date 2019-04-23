@@ -14,7 +14,7 @@ import net.minecraft.server.MinecraftServer;
 
 public class GroupManager
 {
-    public static GroupManager instance;
+    public static GroupManager _instance;
 
     public Map<UUID, Group>    _groupIDMap   = Maps.newHashMap();
     public Map<UUID, Player>   _playerIDMap  = Maps.newHashMap();
@@ -104,8 +104,8 @@ public class GroupManager
 
     public boolean hasPermission(UUID id, String perm)
     {
-        Group g = GroupManager.instance.getPlayerGroup(id);
-        Player player = GroupManager.instance._playerIDMap.get(id);
+        Group g = GroupManager._instance.getPlayerGroup(id);
+        Player player = GroupManager._instance._playerIDMap.get(id);
         boolean canPlayerUse = (player != null ? player.hasPermission(perm) : false);
 
         // Check if that player is specifically denied the perm.

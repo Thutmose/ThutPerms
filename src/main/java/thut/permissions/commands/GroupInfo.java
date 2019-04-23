@@ -57,7 +57,7 @@ public class GroupInfo extends BaseCommand
             GameProfile profile = new GameProfile(id, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
-            Group current = GroupManager.instance.getPlayerGroup(profile.getId());
+            Group current = GroupManager._instance.getPlayerGroup(profile.getId());
             if (current == null) sender.sendMessage(new TextComponentString(playerName + " is not in a group"));
             else sender.sendMessage(new TextComponentString(playerName + " is currently in " + current.name));
             return;
@@ -97,9 +97,9 @@ public class GroupInfo extends BaseCommand
         else if (args[0].equalsIgnoreCase("groups"))
         {
             sender.sendMessage(new TextComponentString("List of existing Groups:"));
-            sender.sendMessage(new TextComponentString(GroupManager.instance.initial.name));
-            sender.sendMessage(new TextComponentString(GroupManager.instance.mods.name));
-            for (Group g : GroupManager.instance.groups)
+            sender.sendMessage(new TextComponentString(GroupManager._instance.initial.name));
+            sender.sendMessage(new TextComponentString(GroupManager._instance.mods.name));
+            for (Group g : GroupManager._instance.groups)
             {
                 sender.sendMessage(new TextComponentString(g.name));
             }

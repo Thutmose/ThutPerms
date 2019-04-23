@@ -13,7 +13,7 @@ public class ThutEssentialsCompat
     @SubscribeEvent
     public void NameEvent(NameEvent evt)
     {
-        Group g = GroupManager.instance.getPlayerGroup(evt.toName.getUniqueID());
+        Group g = GroupManager._instance.getPlayerGroup(evt.toName.getUniqueID());
         String name = evt.getName();
         // Apply main group suffix first.
         if (g != null)
@@ -21,7 +21,7 @@ public class ThutEssentialsCompat
             if (!g.prefix.isEmpty()) name = g.prefix + name;
         }
 
-        Player player = GroupManager.instance._playerIDMap.get(evt.toName.getUniqueID());
+        Player player = GroupManager._instance._playerIDMap.get(evt.toName.getUniqueID());
         if (player != null)
         {
             // Prefixes in order in list

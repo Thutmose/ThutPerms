@@ -63,8 +63,8 @@ public class EditPlayer extends BaseCommand
         {
             if (args.length < 3) throw new CommandException(super.getUsage(sender) + " !add <group>");
             String groupName = args[2];
-            Player player = GroupManager.instance._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.instance.createPlayer(profile.getId());
+            Player player = GroupManager._instance._playerIDMap.get(profile.getId());
+            if (player == null) player = GroupManager._instance.createPlayer(profile.getId());
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
             player.addGroup(g);
@@ -76,8 +76,8 @@ public class EditPlayer extends BaseCommand
         {
             if (args.length < 3) throw new CommandException(super.getUsage(sender) + " !remove <group>");
             String groupName = args[2];
-            Player player = GroupManager.instance._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.instance.createPlayer(profile.getId());
+            Player player = GroupManager._instance._playerIDMap.get(profile.getId());
+            if (player == null) player = GroupManager._instance.createPlayer(profile.getId());
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
             player.removeGroup(g);
@@ -87,8 +87,8 @@ public class EditPlayer extends BaseCommand
 
         if (check)
         {
-            Player player = GroupManager.instance._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.instance.createPlayer(profile.getId());
+            Player player = GroupManager._instance._playerIDMap.get(profile.getId());
+            if (player == null) player = GroupManager._instance.createPlayer(profile.getId());
             sender.sendMessage(new TextComponentString("Personal Groups for " + player + ":"));
             for (String s : player.groups)
             {
@@ -98,8 +98,8 @@ public class EditPlayer extends BaseCommand
 
         if (reset)
         {
-            Player player = GroupManager.instance._playerIDMap.remove(profile.getId());
-            if (player != null) GroupManager.instance.players.remove(profile.getId());
+            Player player = GroupManager._instance._playerIDMap.remove(profile.getId());
+            if (player != null) GroupManager._instance.players.remove(profile.getId());
             sender.sendMessage(new TextComponentString("Removed personal settings for " + playerName));
             ThutPerms.savePerms();
             return;
@@ -108,7 +108,7 @@ public class EditPlayer extends BaseCommand
         check = args.length == 2;
         if (check)
         {
-            Player player = GroupManager.instance._playerIDMap.get(profile.getId());
+            Player player = GroupManager._instance._playerIDMap.get(profile.getId());
             if (player == null) throw new CommandException("No custom permissions for " + playerName);
             if (all)
             {
@@ -121,8 +121,8 @@ public class EditPlayer extends BaseCommand
             return;
         }
         boolean value = Boolean.parseBoolean(args[2]);
-        Player player = GroupManager.instance._playerIDMap.get(profile.getId());
-        if (player == null) player = GroupManager.instance.createPlayer(profile.getId());
+        Player player = GroupManager._instance._playerIDMap.get(profile.getId());
+        if (player == null) player = GroupManager._instance.createPlayer(profile.getId());
         if (all)
         {
             player.all = value;

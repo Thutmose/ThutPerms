@@ -66,6 +66,8 @@ public class ThutPerms
                                                                   @Override
                                                                   public boolean shouldSkipClass(Class<?> clazz)
                                                                   {
+                                                                      if (clazz.getName().contains("net.minecraft"))
+                                                                          return true;
                                                                       return false;
                                                                   }
                                                               };
@@ -166,15 +168,15 @@ public class ThutPerms
         }
         manager.onServerStarted(event);
         loadPerms();
-        if (GroupManager.instance.initial == null)
+        if (GroupManager._instance.initial == null)
         {
-            GroupManager.instance.initial = new Group("default");
+            GroupManager._instance.initial = new Group("default");
             savePerms();
         }
-        if (GroupManager.instance.mods == null)
+        if (GroupManager._instance.mods == null)
         {
-            GroupManager.instance.mods = new Group("mods");
-            GroupManager.instance.mods.all = true;
+            GroupManager._instance.mods = new Group("mods");
+            GroupManager._instance.mods.all = true;
             savePerms();
         }
     }
@@ -210,18 +212,21 @@ public class ThutPerms
     {
         if (jsonFile.exists())
         {
+            String json = null;
             try
             {
                 Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(exclusion).setPrettyPrinting()
                         .create();
-                String json = FileUtils.readFileToString(jsonFile, "UTF-8");
-                GroupManager.instance = gson.fromJson(json, GroupManager.class);
-                GroupManager.instance.init();
+                json = FileUtils.readFileToString(jsonFile, "UTF-8");
+                GroupManager._instance = gson.fromJson(json, GroupManager.class);
+                GroupManager._instance.init();
                 savePerms();
             }
-            catch (IOException e)
+            catch (Throwable e)
             {
                 e.printStackTrace();
+                System.err.println("\n" + json);
+                System.out.println(e);
             }
             return;
         }
@@ -241,8 +246,8 @@ public class ThutPerms
                     Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(exclusion).setPrettyPrinting()
                             .create();
                     String json = FileUtils.readFileToString(permsFile, "UTF-8");
-                    GroupManager.instance = gson.fromJson(json, GroupManager.class);
-                    GroupManager.instance.init();
+                    GroupManager._instance = gson.fromJson(json, GroupManager.class);
+                    GroupManager._instance.init();
                     savePerms();
                 }
                 catch (IOException e)
@@ -253,8 +258,8 @@ public class ThutPerms
         }
         else
         {
-            GroupManager.instance = new GroupManager();
-            GroupManager.instance.init();
+            GroupManager._instance = new GroupManager();
+            GroupManager._instance.init();
             savePerms();
         }
     }
@@ -272,21 +277,21 @@ public class ThutPerms
                     return t == null || t.isEmpty();
                 }
             };
-            for (Group group : GroupManager.instance.groups)
+            for (Group group : GroupManager._instance.groups)
             {
                 group.allowedCommands.removeIf(nonnull);
                 group.bannedCommands.removeIf(nonnull);
                 if (!group.allowedCommands.isEmpty()) Collections.sort(group.allowedCommands);
                 if (!group.bannedCommands.isEmpty()) Collections.sort(group.bannedCommands);
             }
-            for (Player player : GroupManager.instance.players)
+            for (Player player : GroupManager._instance.players)
             {
                 player.allowedCommands.removeIf(nonnull);
                 player.bannedCommands.removeIf(nonnull);
                 if (!player.allowedCommands.isEmpty()) Collections.sort(player.allowedCommands);
                 if (!player.bannedCommands.isEmpty()) Collections.sort(player.bannedCommands);
             }
-            FileUtils.writeStringToFile(jsonFile, gson.toJson(GroupManager.instance), "UTF-8");
+            FileUtils.writeStringToFile(jsonFile, gson.toJson(GroupManager._instance), "UTF-8");
         }
         catch (Exception e)
         {
@@ -297,30 +302,30 @@ public class ThutPerms
     public static Group addGroup(String name)
     {
         Group ret = new Group(name);
-        GroupManager.instance._groupNameMap.put(name, ret);
-        GroupManager.instance.groups.add(ret);
+        GroupManager._instance._groupNameMap.put(name, ret);
+        GroupManager._instance.groups.add(ret);
         return ret;
     }
 
     public static void addToGroup(UUID id, String name)
     {
-        Group group = GroupManager.instance._groupNameMap.get(name);
+        Group group = GroupManager._instance._groupNameMap.get(name);
         // Remove from all other groups first.
-        GroupManager.instance.initial.members.remove(id);
-        GroupManager.instance.mods.members.remove(id);
-        for (Group old : GroupManager.instance.groups)
+        GroupManager._instance.initial.members.remove(id);
+        GroupManager._instance.mods.members.remove(id);
+        for (Group old : GroupManager._instance.groups)
             old.members.remove(id);
         if (group != null)
         {
             group.members.add(id);
-            GroupManager.instance._groupIDMap.put(id, group);
+            GroupManager._instance._groupIDMap.put(id, group);
         }
     }
 
     public static Group getGroup(String name)
     {
-        if (name.equals(GroupManager.instance.initial.name)) return GroupManager.instance.initial;
-        if (name.equals(GroupManager.instance.mods.name)) return GroupManager.instance.mods;
-        return GroupManager.instance._groupNameMap.get(name);
+        if (name.equals(GroupManager._instance.initial.name)) return GroupManager._instance.initial;
+        if (name.equals(GroupManager._instance.mods.name)) return GroupManager._instance.mods;
+        return GroupManager._instance._groupNameMap.get(name);
     }
 }
