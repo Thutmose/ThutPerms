@@ -84,7 +84,7 @@ public class SpawnProtector
 
     private boolean canEditSpawn(EntityPlayer player)
     {
-        return GroupManager._instance.hasPermission(player.getUniqueID(), "thutperms.editspawn");
+        return GroupManager.get_instance().hasPermission(player.getUniqueID(), "thutperms.editspawn");
     }
 
 }

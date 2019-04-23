@@ -29,10 +29,10 @@ public class RemoveGroup extends BaseCommand
         String groupName = args[0];
         Group g = ThutPerms.getGroup(groupName);
         if (g == null) throw new CommandException("Error, specified Group does not exist.");
-        if (g == GroupManager._instance.initial || g == GroupManager._instance.mods)
+        if (g == GroupManager.get_instance().initial || g == GroupManager.get_instance().mods)
             throw new CommandException("Error, cannot remove default groups.");
-        GroupManager._instance.groups.remove(g);
-        GroupManager._instance._groupNameMap.remove(groupName);
+        GroupManager.get_instance().groups.remove(g);
+        GroupManager.get_instance()._groupNameMap.remove(groupName);
         ThutPerms.savePerms();
         sender.sendMessage(new TextComponentString("Removed group " + groupName));
     }

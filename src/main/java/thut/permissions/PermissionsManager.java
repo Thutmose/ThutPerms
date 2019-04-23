@@ -60,15 +60,15 @@ public class PermissionsManager implements IPermissionHandler
     {
         if (FMLCommonHandler.instance().getMinecraftServerInstance() == null) return true;
         if (SPDiabled && FMLCommonHandler.instance().getMinecraftServerInstance().isSinglePlayer()) return true;
-        if (GroupManager._instance == null)
+        if (GroupManager.get_instance() == null)
         {
             ThutPerms.logger.log(Level.WARNING, node + " is being checked before load!");
             Thread.dumpStack();
             return getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
         }
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
-                "permnode: " + node + " " + profile + " " + GroupManager._instance.hasPermission(profile.getId(), node));
-        return GroupManager._instance.hasPermission(profile.getId(), node);
+                "permnode: " + node + " " + profile + " " + GroupManager.get_instance().hasPermission(profile.getId(), node));
+        return GroupManager.get_instance().hasPermission(profile.getId(), node);
     }
 
     @Override
@@ -174,11 +174,11 @@ public class PermissionsManager implements IPermissionHandler
     {
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO, "command use: " + command.getName() + ", "
                 + command.getAliases() + ", " + sender.getGameProfile() + " " + command.getClass());
-        if (GroupManager._instance._playerIDMap.containsKey(sender.getUniqueID()))
+        if (GroupManager.get_instance()._playerIDMap.containsKey(sender.getUniqueID()))
         {
-            Player player = GroupManager._instance._playerIDMap.get(sender.getUniqueID());
+            Player player = GroupManager.get_instance()._playerIDMap.get(sender.getUniqueID());
             if (player.canUse(command)) return true;
         }
-        return GroupManager._instance.getPlayerGroup(sender.getUniqueID()).canUse(command);
+        return GroupManager.get_instance().getPlayerGroup(sender.getUniqueID()).canUse(command);
     }
 }

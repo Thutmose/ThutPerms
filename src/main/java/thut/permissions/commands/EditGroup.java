@@ -109,8 +109,8 @@ public class EditGroup extends BaseCommand
                 String childName = args[2];
                 String parentName = args[3];
 
-                PermissionsHolder child = GroupManager._instance._groupNameMap.get(childName);
-                Group parent = GroupManager._instance._groupNameMap.get(parentName);
+                PermissionsHolder child = GroupManager.get_instance()._groupNameMap.get(childName);
+                Group parent = GroupManager.get_instance()._groupNameMap.get(parentName);
 
                 if (parent == null) throw new CommandException("No group with name " + parent);
                 if (child == null)
@@ -129,8 +129,8 @@ public class EditGroup extends BaseCommand
                     profile = TileEntitySkull.updateGameprofile(profile);
                     if (profile.getId() == null) { throw new CommandException(
                             "Error, cannot find profile for " + childName); }
-                    child = GroupManager._instance.getPlayerGroup(profile.getId());
-                    if (child == null) child = GroupManager._instance.createPlayer(profile.getId());
+                    child = GroupManager.get_instance().getPlayerGroup(profile.getId());
+                    if (child == null) child = GroupManager.get_instance().createPlayer(profile.getId());
                 }
                 child._parent = parent;
                 child.parentName = parentName;
@@ -212,9 +212,9 @@ public class EditGroup extends BaseCommand
             GameProfile profile = new GameProfile(id, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
-            Group old = GroupManager._instance.getPlayerGroup(profile.getId());
+            Group old = GroupManager.get_instance().getPlayerGroup(profile.getId());
             if (old != null) old.members.remove(profile.getId());
-            GroupManager._instance._groupIDMap.remove(profile.getId());
+            GroupManager.get_instance()._groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), groupName);
             sender.sendMessage(new TextComponentString("Added " + playerName + " to " + groupName));
             ThutPerms.savePerms();
@@ -234,10 +234,10 @@ public class EditGroup extends BaseCommand
             GameProfile profile = new GameProfile(id, playerName);
             profile = TileEntitySkull.updateGameprofile(profile);
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
-            Group old = GroupManager._instance.getPlayerGroup(profile.getId());
+            Group old = GroupManager.get_instance().getPlayerGroup(profile.getId());
             if (old != null) old.members.remove(profile.getId());
-            GroupManager._instance._groupIDMap.remove(profile.getId());
-            ThutPerms.addToGroup(profile.getId(), GroupManager._instance.initial.name);
+            GroupManager.get_instance()._groupIDMap.remove(profile.getId());
+            ThutPerms.addToGroup(profile.getId(), GroupManager.get_instance().initial.name);
             ThutPerms.savePerms();
             return;
         }

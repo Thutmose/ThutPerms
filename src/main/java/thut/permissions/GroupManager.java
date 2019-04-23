@@ -14,18 +14,37 @@ import net.minecraft.server.MinecraftServer;
 
 public class GroupManager
 {
-    public static GroupManager _instance;
+    private static GroupManager              _instance;
 
-    public Map<UUID, Group>    _groupIDMap   = Maps.newHashMap();
-    public Map<UUID, Player>   _playerIDMap  = Maps.newHashMap();
-    public Map<String, Group>  _groupNameMap = Maps.newHashMap();
-    public HashSet<Group>      groups        = Sets.newHashSet();
-    public HashSet<Player>     players       = Sets.newHashSet();
+    /** Map of dimension id to group manager. */
+    public static Map<Integer, GroupManager> _instanceMap  = Maps.newHashMap();
 
-    public Group               initial       = new Group("default");
-    public Group               mods          = new Group("mods");
+    public Map<UUID, Group>                  _groupIDMap   = Maps.newHashMap();
+    public Map<UUID, Player>                 _playerIDMap  = Maps.newHashMap();
+    public Map<String, Group>                _groupNameMap = Maps.newHashMap();
+    public HashSet<Group>                    groups        = Sets.newHashSet();
+    public HashSet<Player>                   players       = Sets.newHashSet();
 
-    public MinecraftServer     _server;
+    public Group                             initial       = new Group("default");
+    public Group                             mods          = new Group("mods");
+
+    public MinecraftServer                   _server;
+
+    /**
+     * @return the _instance
+     */
+    public static GroupManager get_instance()
+    {
+        return _instance;
+    }
+
+    /**
+     * @param _instance the _instance to set
+     */
+    public static void set_instance(GroupManager _instance)
+    {
+        GroupManager._instance = _instance;
+    }
 
     public GroupManager()
     {
@@ -104,8 +123,8 @@ public class GroupManager
 
     public boolean hasPermission(UUID id, String perm)
     {
-        Group g = GroupManager._instance.getPlayerGroup(id);
-        Player player = GroupManager._instance._playerIDMap.get(id);
+        Group g = GroupManager.get_instance().getPlayerGroup(id);
+        Player player = GroupManager.get_instance()._playerIDMap.get(id);
         boolean canPlayerUse = (player != null ? player.hasPermission(perm) : false);
 
         // Check if that player is specifically denied the perm.
