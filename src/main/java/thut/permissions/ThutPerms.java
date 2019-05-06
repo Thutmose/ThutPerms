@@ -180,6 +180,7 @@ public class ThutPerms
             GroupManager.get_instance().mods.all = true;
             savePerms();
         }
+        GroupManager.get_instance()._server = FMLCommonHandler.instance().getMinecraftServerInstance();
     }
 
     @EventHandler
