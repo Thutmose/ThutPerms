@@ -46,4 +46,10 @@ public class Player extends PermissionsHolder
             if (group.isDenied(permission)) return true;
         return super.isDenied(permission);
     }
+
+    @Override
+    public boolean isAll_non_op()
+    {
+        return false;
+    }
 }

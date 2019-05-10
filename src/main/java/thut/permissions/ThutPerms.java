@@ -30,6 +30,8 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -47,7 +49,8 @@ public class ThutPerms
 
     public static boolean                  allCommandUse      = false;
     public static File                     configFile         = null;
-    public static File                     jsonFile           = null;
+    public static File                     jsonFile_groups    = null;
+    public static File                     folder_players     = null;
     public static final PermissionsManager manager            = new PermissionsManager();
     public static Logger                   logger             = Logger.getLogger(MODID);
     public static boolean                  debug              = false;
@@ -104,7 +107,9 @@ public class ThutPerms
     {
         Configuration config = new Configuration(configFile = e.getSuggestedConfigurationFile());
         File folder = new File(configFile.getParentFile(), "thutperms");
-        jsonFile = new File(folder, "thutperms.json");
+        jsonFile_groups = new File(folder, "thutperms.json");
+        folder_players = new File(folder, "players");
+        folder_players.mkdirs();
         config.load();
         allCommandUse = config.getBoolean("allCommandUse", Configuration.CATEGORY_GENERAL, false,
                 "Can any player use OP commands if their group is allowed to?");
@@ -177,7 +182,7 @@ public class ThutPerms
         if (GroupManager.get_instance().mods == null)
         {
             GroupManager.get_instance().mods = new Group("mods");
-            GroupManager.get_instance().mods.all = true;
+            GroupManager.get_instance().mods.setAll(true);
             savePerms();
         }
         GroupManager.get_instance()._server = FMLCommonHandler.instance().getMinecraftServerInstance();
@@ -196,6 +201,20 @@ public class ThutPerms
         ThutPerms.setAnyCommandUse(event.getServer(), allCommandUse);
     }
 
+    @SubscribeEvent
+    void logIn(PlayerLoggedInEvent event)
+    {
+        PlayerManager manager = GroupManager.get_instance()._manager;
+        manager.createPlayer(event.player);
+    }
+
+    @SubscribeEvent
+    void logOut(PlayerLoggedInEvent event)
+    {
+        PlayerManager manager = GroupManager.get_instance()._manager;
+        manager.unloadPlayer(event.player);
+    }
+
     public static void setAnyCommandUse(MinecraftServer server, boolean enable)
     {
         Field f = ReflectionHelper.findField(PlayerList.class, "commandsAllowedForAll", "field_72407_n", "t");
@@ -212,14 +231,14 @@ public class ThutPerms
 
     public static void loadPerms()
     {
-        if (jsonFile.exists())
+        if (jsonFile_groups.exists())
         {
             String json = null;
             try
             {
                 Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(exclusion).setPrettyPrinting()
                         .create();
-                json = FileUtils.readFileToString(jsonFile, "UTF-8");
+                json = FileUtils.readFileToString(jsonFile_groups, "UTF-8");
                 GroupManager.set_instance(gson.fromJson(json, GroupManager.class));
                 GroupManager.get_instance().init();
                 savePerms();
@@ -286,14 +305,7 @@ public class ThutPerms
                 if (!group.allowedCommands.isEmpty()) Collections.sort(group.allowedCommands);
                 if (!group.bannedCommands.isEmpty()) Collections.sort(group.bannedCommands);
             }
-            for (Player player : GroupManager.get_instance().players)
-            {
-                player.allowedCommands.removeIf(nonnull);
-                player.bannedCommands.removeIf(nonnull);
-                if (!player.allowedCommands.isEmpty()) Collections.sort(player.allowedCommands);
-                if (!player.bannedCommands.isEmpty()) Collections.sort(player.bannedCommands);
-            }
-            FileUtils.writeStringToFile(jsonFile, gson.toJson(GroupManager.get_instance()), "UTF-8");
+            FileUtils.writeStringToFile(jsonFile_groups, gson.toJson(GroupManager.get_instance()), "UTF-8");
         }
         catch (Exception e)
         {

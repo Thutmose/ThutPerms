@@ -29,7 +29,7 @@ public class AddGroup extends BaseCommand
         Group g = ThutPerms.getGroup(groupName);
         if (g != null) { throw new CommandException("Error, Group already exists, cannot create again."); }
         g = ThutPerms.addGroup(groupName);
-        g.all = false;
+        g.setAll(false);
         g._init = false;
         for (String node : ThutPerms.manager.getRegisteredNodes())
         {

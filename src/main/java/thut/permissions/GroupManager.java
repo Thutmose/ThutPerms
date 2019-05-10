@@ -20,27 +20,23 @@ public class GroupManager
     public static Map<Integer, GroupManager> _instanceMap  = Maps.newHashMap();
 
     public Map<UUID, Group>                  _groupIDMap   = Maps.newHashMap();
-    public Map<UUID, Player>                 _playerIDMap  = Maps.newHashMap();
     public Map<String, Group>                _groupNameMap = Maps.newHashMap();
     public HashSet<Group>                    groups        = Sets.newHashSet();
-    public HashSet<Player>                   players       = Sets.newHashSet();
 
     public Group                             initial       = new Group("default");
     public Group                             mods          = new Group("mods");
 
+    public PlayerManager                     _manager      = null;
     public MinecraftServer                   _server;
 
-    /**
-     * @return the _instance
-     */
+    /** @return the _instance */
     public static GroupManager get_instance()
     {
         return _instance;
     }
 
-    /**
-     * @param _instance the _instance to set
-     */
+    /** @param _instance
+     *            the _instance to set */
     public static void set_instance(GroupManager _instance)
     {
         GroupManager._instance = _instance;
@@ -49,6 +45,7 @@ public class GroupManager
     public GroupManager()
     {
         ThutPerms.logger.log(Level.INFO, "Initializing Group Manager.");
+        _manager = new PlayerManager(this);
     }
 
     public void init()
@@ -77,19 +74,10 @@ public class GroupManager
             ThutPerms.addToGroup(id, _groupIDMap.get(id).name);
         }
 
-        mods.all = true;
+        mods.setAll(true);
         _groupNameMap.put(initial.name, initial);
         _groupNameMap.put(mods.name, mods);
-        for (Player player : players)
-        {
-            _playerIDMap.put(player.id, player);
-            // Set up parent.
-            if (player.parentName != null)
-            {
-                player._parent = _groupNameMap.get(player.parentName);
-                if (player._parent == null) player.parentName = null;
-            }
-        }
+
         // Set up parents.
         for (Group g : groups)
         {
@@ -99,15 +87,6 @@ public class GroupManager
                 if (g._parent == null) g.parentName = null;
             }
         }
-    }
-
-    public Player createPlayer(UUID id)
-    {
-        Player player = new Player();
-        player.id = id;
-        players.add(player);
-        _playerIDMap.put(id, player);
-        return player;
     }
 
     public Group getPlayerGroup(UUID id)
@@ -123,8 +102,8 @@ public class GroupManager
 
     public boolean hasPermission(UUID id, String perm)
     {
-        Group g = GroupManager.get_instance().getPlayerGroup(id);
-        Player player = GroupManager.get_instance()._playerIDMap.get(id);
+        Group g = getPlayerGroup(id);
+        Player player = _manager.getPlayer(id);
         boolean canPlayerUse = (player != null ? player.hasPermission(perm) : false);
 
         // Check if that player is specifically denied the perm.

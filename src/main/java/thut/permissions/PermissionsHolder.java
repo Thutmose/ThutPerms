@@ -78,9 +78,9 @@ public abstract class PermissionsHolder
     public boolean isAllowed(String permission)
     {
         if (_parent != null && _parent.isAllowed(permission)) return true;
-        if (all) return true;
+        if (isAll()) return true;
         if (!_init || _whiteWildCards == null || allowedCommands == null) init();
-        if (all_non_op && ThutPerms.manager.getDefaultPermissionLevel(permission) == DefaultPermissionLevel.ALL)
+        if (isAll_non_op() && ThutPerms.manager.getDefaultPermissionLevel(permission) == DefaultPermissionLevel.ALL)
             return true;
         for (String pattern : _whiteWildCards)
         {
@@ -121,6 +121,26 @@ public abstract class PermissionsHolder
                 && isAllowed(ThutPerms.customCommandPerms.get(command.getName())))
             return true;
         return isAllowed(command.getClass().getName());
+    }
+
+    public boolean isAll()
+    {
+        return all;
+    }
+
+    public void setAll(boolean all)
+    {
+        this.all = all;
+    }
+
+    public boolean isAll_non_op()
+    {
+        return all_non_op;
+    }
+
+    public void setAll_non_op(boolean all_non_op)
+    {
+        this.all_non_op = all_non_op;
     }
 
 }

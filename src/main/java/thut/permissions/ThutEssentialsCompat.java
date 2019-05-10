@@ -21,7 +21,7 @@ public class ThutEssentialsCompat
             if (!g.prefix.isEmpty()) name = g.prefix + name;
         }
 
-        Player player = GroupManager.get_instance()._playerIDMap.get(evt.toName.getUniqueID());
+        Player player = GroupManager.get_instance()._manager.getPlayer(evt.toName.getUniqueID());
         if (player != null)
         {
             // Prefixes in order in list

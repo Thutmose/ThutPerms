@@ -12,6 +12,7 @@ import net.minecraft.util.text.TextComponentString;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
 import thut.permissions.Player;
+import thut.permissions.PlayerManager;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
 
@@ -52,23 +53,24 @@ public class EditPlayer extends BaseCommand
         GameProfile profile = new GameProfile(id, playerName);
         profile = TileEntitySkull.updateGameprofile(profile);
         if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
+        id = profile.getId();
         String permission = args[1];
         boolean all = permission.equalsIgnoreCase("all");
         boolean reset = permission.equalsIgnoreCase("reset");
         boolean add = permission.equalsIgnoreCase("!add");
         boolean remove = permission.equalsIgnoreCase("!remove");
         boolean check = permission.equalsIgnoreCase("!groups");
+        PlayerManager manager = GroupManager.get_instance()._manager;
+        Player player = manager.getPlayer(id);
 
         if (add)
         {
             if (args.length < 3) throw new CommandException(super.getUsage(sender) + " !add <group>");
             String groupName = args[2];
-            Player player = GroupManager.get_instance()._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.get_instance().createPlayer(profile.getId());
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
             player.addGroup(g);
-            ThutPerms.savePerms();
+            manager.savePlayer(id);
             return;
         }
 
@@ -76,19 +78,15 @@ public class EditPlayer extends BaseCommand
         {
             if (args.length < 3) throw new CommandException(super.getUsage(sender) + " !remove <group>");
             String groupName = args[2];
-            Player player = GroupManager.get_instance()._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.get_instance().createPlayer(profile.getId());
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, Specifed group does not exist."); }
             player.removeGroup(g);
-            ThutPerms.savePerms();
+            manager.savePlayer(id);
             return;
         }
 
         if (check)
         {
-            Player player = GroupManager.get_instance()._playerIDMap.get(profile.getId());
-            if (player == null) player = GroupManager.get_instance().createPlayer(profile.getId());
             sender.sendMessage(new TextComponentString("Personal Groups for " + player + ":"));
             for (String s : player.groups)
             {
@@ -98,22 +96,21 @@ public class EditPlayer extends BaseCommand
 
         if (reset)
         {
-            Player player = GroupManager.get_instance()._playerIDMap.remove(profile.getId());
-            if (player != null) GroupManager.get_instance().players.remove(profile.getId());
+            player.setAll(false);
+            player.getAllowedCommands().clear();
+            player.getBannedCommands().clear();
             sender.sendMessage(new TextComponentString("Removed personal settings for " + playerName));
-            ThutPerms.savePerms();
+            manager.savePlayer(id);
             return;
         }
 
         check = args.length == 2;
         if (check)
         {
-            Player player = GroupManager.get_instance()._playerIDMap.get(profile.getId());
-            if (player == null) throw new CommandException("No custom permissions for " + playerName);
             if (all)
             {
                 sender.sendMessage(
-                        new TextComponentString("All permission state for " + playerName + " is " + player.all));
+                        new TextComponentString("All permission state for " + playerName + " is " + player.isAll()));
                 return;
             }
             sender.sendMessage(new TextComponentString(
@@ -121,31 +118,29 @@ public class EditPlayer extends BaseCommand
             return;
         }
         boolean value = Boolean.parseBoolean(args[2]);
-        Player player = GroupManager.get_instance()._playerIDMap.get(profile.getId());
-        if (player == null) player = GroupManager.get_instance().createPlayer(profile.getId());
         if (all)
         {
-            player.all = value;
+            player.setAll(value);
             sender.sendMessage(
-                    new TextComponentString("All permission state for " + playerName + " set to " + player.all));
+                    new TextComponentString("All permission state for " + playerName + " set to " + player.isAll()));
         }
         else
         {
             if (value)
             {
-                player.getAllowedCommands().add(permission);
+                if (!player.getAllowedCommands().contains(permission)) player.getAllowedCommands().add(permission);
                 player.getBannedCommands().remove(permission);
             }
             else
             {
                 player.getAllowedCommands().remove(permission);
-                player.getBannedCommands().add(permission);
+                if (!player.getBannedCommands().contains(permission)) player.getBannedCommands().add(permission);
             }
             sender.sendMessage(new TextComponentString(
                     "Permission for " + playerName + " set to " + player.hasPermission(permission)));
         }
         player._init = false;
-        ThutPerms.savePerms();
+        manager.savePlayer(id);
     }
 
 }

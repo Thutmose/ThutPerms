@@ -39,7 +39,7 @@ public class CopyGroup extends BaseCommand
             gTo.getBannedCommands().clear();
         }
 
-        gTo.all = gFrom.all;
+        gTo.setAll(gFrom.isAll());
         gTo._init = false;
         gTo.getAllowedCommands().addAll(gFrom.getAllowedCommands());
         gTo.getBannedCommands().addAll(gFrom.getBannedCommands());

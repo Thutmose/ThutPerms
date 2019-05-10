@@ -66,8 +66,8 @@ public class PermissionsManager implements IPermissionHandler
             Thread.dumpStack();
             return getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
         }
-        if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO,
-                "permnode: " + node + " " + profile + " " + GroupManager.get_instance().hasPermission(profile.getId(), node));
+        if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO, "permnode: " + node + " " + profile + " "
+                + GroupManager.get_instance().hasPermission(profile.getId(), node));
         return GroupManager.get_instance().hasPermission(profile.getId(), node);
     }
 
@@ -174,11 +174,7 @@ public class PermissionsManager implements IPermissionHandler
     {
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO, "command use: " + command.getName() + ", "
                 + command.getAliases() + ", " + sender.getGameProfile() + " " + command.getClass());
-        if (GroupManager.get_instance()._playerIDMap.containsKey(sender.getUniqueID()))
-        {
-            Player player = GroupManager.get_instance()._playerIDMap.get(sender.getUniqueID());
-            if (player.canUse(command)) return true;
-        }
-        return GroupManager.get_instance().getPlayerGroup(sender.getUniqueID()).canUse(command);
+        Player player = GroupManager.get_instance()._manager.getPlayer(sender.getUniqueID());
+        return player.canUse(command);
     }
 }

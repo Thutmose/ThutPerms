@@ -130,7 +130,7 @@ public class EditGroup extends BaseCommand
                     if (profile.getId() == null) { throw new CommandException(
                             "Error, cannot find profile for " + childName); }
                     child = GroupManager.get_instance().getPlayerGroup(profile.getId());
-                    if (child == null) child = GroupManager.get_instance().createPlayer(profile.getId());
+                    if (child == null) child = GroupManager.get_instance()._manager.createPlayer(profile.getId());
                 }
                 child._parent = parent;
                 child.parentName = parentName;
@@ -248,9 +248,9 @@ public class EditGroup extends BaseCommand
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.getAllowedCommands().clear();
             g.getBannedCommands().clear();
-            g.all = false;
+            g.setAll(false);
             g._init = false;
-            g.all_non_op = true;
+            g.setAll_non_op(true);
             sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
@@ -262,7 +262,7 @@ public class EditGroup extends BaseCommand
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             g.getAllowedCommands().clear();
             g.getBannedCommands().clear();
-            g.all = false;
+            g.setAll(false);
             g._init = false;
             sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
             ThutPerms.savePerms();

@@ -126,7 +126,7 @@ public class GroupInfo extends BaseCommand
             {
                 sender.sendMessage(new TextComponentString(s));
             }
-            sender.sendMessage(new TextComponentString("all set to: " + g.all));
+            sender.sendMessage(new TextComponentString("all set to: " + g.isAll()));
             return;
         }
         throw new CommandException(getUsage(sender));

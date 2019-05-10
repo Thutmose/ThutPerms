@@ -42,7 +42,7 @@ public class EditPerms extends BaseCommand
             if (g == null) { throw new CommandException("Error, Group not found, please create it first."); }
             if (command.equalsIgnoreCase("all"))
             {
-                g.all = enable;
+                g.setAll(enable);
                 sender.sendMessage(new TextComponentString("Set all Permission for " + groupName + " to " + enable));
                 ThutPerms.savePerms();
                 return;
@@ -50,13 +50,13 @@ public class EditPerms extends BaseCommand
             g._init = false;
             if (enable)
             {
-                g.getAllowedCommands().add(command);
+                if (!g.getAllowedCommands().contains(command)) g.getAllowedCommands().add(command);
                 g.getBannedCommands().remove(command);
             }
             else
             {
                 g.getAllowedCommands().remove(command);
-                g.getBannedCommands().add(command);
+                if (!g.getBannedCommands().contains(command)) g.getBannedCommands().add(command);
             }
             sender.sendMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
             ThutPerms.savePerms();
