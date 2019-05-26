@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.text.TextComponentString;
@@ -43,15 +44,25 @@ public class EditPlayer extends BaseCommand
     {
         String playerName = args[0];
         UUID id = null;
+        GameProfile profile = null;
         try
         {
-            id = UUID.fromString(playerName);
+            EntityPlayer test = getPlayer(server, sender, playerName);
+            id = test.getUniqueID();
+            profile = test.getGameProfile();
         }
-        catch (Exception e)
+        catch (Exception e1)
         {
+            try
+            {
+                id = UUID.fromString(playerName);
+            }
+            catch (Exception e)
+            {
+            }
+            profile = new GameProfile(id, playerName);
+            profile = TileEntitySkull.updateGameprofile(profile);
         }
-        GameProfile profile = new GameProfile(id, playerName);
-        profile = TileEntitySkull.updateGameprofile(profile);
         if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
         id = profile.getId();
         String permission = args[1];

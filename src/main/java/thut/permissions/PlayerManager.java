@@ -2,6 +2,7 @@ package thut.permissions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -63,14 +64,6 @@ public class PlayerManager
         return player;
     }
 
-    public Player createPlayer(UUID id)
-    {
-        Player player = new Player();
-        player.id = id;
-        init(player);
-        return player;
-    }
-
     public Group getPlayerGroup(UUID id)
     {
         Group ret = _manager._groupIDMap.get(id);
@@ -110,8 +103,13 @@ public class PlayerManager
                 return t == null || t.isEmpty();
             }
         };
-        player.allowedCommands.removeIf(nonnull);
-        player.bannedCommands.removeIf(nonnull);
+
+        player.getAllowedCommands().removeIf(nonnull);
+        player.getBannedCommands().removeIf(nonnull);
+
+        Collections.sort(player.getAllowedCommands());
+        Collections.sort(player.getBannedCommands());
+
         try
         {
             FileUtils.writeStringToFile(playerFile, gson.toJson(player), "UTF-8");
@@ -131,15 +129,10 @@ public class PlayerManager
         _playerIDMap.remove(id);
     }
 
-    public void createPlayer(EntityPlayer player_)
+    public boolean loadPlayer(UUID id)
     {
-        File playerFile = new File(ThutPerms.folder_players, player_.getCachedUniqueIdString() + ".json");
-        if (!playerFile.exists())
-        {
-            createPlayer(player_.getUniqueID());
-            return;
-        }
-        UUID id = player_.getUniqueID();
+        File playerFile = new File(ThutPerms.folder_players, id + ".json");
+        if (!playerFile.exists()) return false;
         String json = null;
         try
         {
@@ -149,14 +142,29 @@ public class PlayerManager
             Player player = gson.fromJson(json, Player.class);
             player.id = id;
             init(player);
+            return true;
         }
         catch (Throwable e)
         {
             e.printStackTrace();
             System.err.println("\n" + json);
             System.out.println(e);
-            createPlayer(id);
+            return false;
         }
+    }
+
+    public Player createPlayer(UUID id)
+    {
+        if (loadPlayer(id)) return _playerIDMap.get(id);
+        Player player = new Player();
+        player.id = id;
+        init(player);
+        return player;
+    }
+
+    public void createPlayer(EntityPlayer player_)
+    {
+        createPlayer(player_.getUniqueID());
     }
 
 }
