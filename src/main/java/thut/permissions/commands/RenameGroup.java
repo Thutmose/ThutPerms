@@ -6,9 +6,9 @@ import java.util.UUID;
 import com.google.common.collect.Sets;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
 import thut.permissions.ThutPerms;
@@ -22,13 +22,13 @@ public class RenameGroup extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <oldname> <newname>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String groupName = args[0];
         String newName = args[1];
@@ -57,6 +57,6 @@ public class RenameGroup extends BaseCommand
             ThutPerms.addToGroup(id, newName);
         }
         ThutPerms.savePerms();
-        sender.sendMessage(new TextComponentString("Renamed group " + groupName + " to " + newName));
+        sender.sendMessage(new StringTextComponent("Renamed group " + groupName + " to " + newName));
     }
 }

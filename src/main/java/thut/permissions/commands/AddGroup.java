@@ -1,9 +1,9 @@
 package thut.permissions.commands;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.permissions.Group;
 import thut.permissions.ThutPerms;
@@ -17,13 +17,13 @@ public class AddGroup extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <groupname>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String groupName = args[0];
         Group g = ThutPerms.getGroup(groupName);
@@ -39,7 +39,7 @@ public class AddGroup extends BaseCommand
             }
         }
         ThutPerms.savePerms();
-        sender.sendMessage(new TextComponentString("Created group " + groupName));
+        sender.sendMessage(new StringTextComponent("Created group " + groupName));
     }
 
 }

@@ -6,11 +6,11 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
@@ -26,7 +26,7 @@ public class GroupInfo extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + "<player|exists|hasPerms|members|groups|listCommands|perms> <arguments>";
     }
@@ -41,7 +41,7 @@ public class GroupInfo extends BaseCommand
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length == 0) throw new CommandException(getUsage(sender));
         if (args[0].equalsIgnoreCase("player"))
@@ -51,7 +51,7 @@ public class GroupInfo extends BaseCommand
             GameProfile profile = null;
             try
             {
-                EntityPlayer test = getPlayer(server, sender, playerName);
+                PlayerEntity test = getPlayer(server, sender, playerName);
                 id = test.getUniqueID();
                 profile = test.getGameProfile();
             }
@@ -69,16 +69,16 @@ public class GroupInfo extends BaseCommand
             }
             if (profile.getId() == null) { throw new CommandException("Error, cannot find profile for " + playerName); }
             Group current = GroupManager.get_instance().getPlayerGroup(profile.getId());
-            if (current == null) sender.sendMessage(new TextComponentString(playerName + " is not in a group"));
-            else sender.sendMessage(new TextComponentString(playerName + " is currently in " + current.name));
+            if (current == null) sender.sendMessage(new StringTextComponent(playerName + " is not in a group"));
+            else sender.sendMessage(new StringTextComponent(playerName + " is currently in " + current.name));
             return;
         }
         else if (args[0].equalsIgnoreCase("exists"))
         {
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
-            if (g != null) sender.sendMessage(new TextComponentString("Group " + groupName + " exists."));
-            else sender.sendMessage(new TextComponentString("Group " + groupName + "does not exist."));
+            if (g != null) sender.sendMessage(new StringTextComponent("Group " + groupName + " exists."));
+            else sender.sendMessage(new StringTextComponent("Group " + groupName + "does not exist."));
             return;
         }
         else if (args[0].equalsIgnoreCase("hasPerms"))
@@ -88,8 +88,8 @@ public class GroupInfo extends BaseCommand
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
             if (g.hasPermission(perm))
-                sender.sendMessage(new TextComponentString("Group " + groupName + " can use " + perm));
-            else sender.sendMessage(new TextComponentString("Group " + groupName + " can not use " + perm));
+                sender.sendMessage(new StringTextComponent("Group " + groupName + " can use " + perm));
+            else sender.sendMessage(new StringTextComponent("Group " + groupName + " can not use " + perm));
             return;
         }
         else if (args[0].equalsIgnoreCase("members"))
@@ -97,33 +97,33 @@ public class GroupInfo extends BaseCommand
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
-            sender.sendMessage(new TextComponentString("Members of Group " + groupName));
+            sender.sendMessage(new StringTextComponent("Members of Group " + groupName));
             for (UUID id : g.members)
             {
                 GameProfile profile = getProfile(server, id);
-                sender.sendMessage(new TextComponentString(profile.getName()));
+                sender.sendMessage(new StringTextComponent(profile.getName()));
             }
             return;
         }
         else if (args[0].equalsIgnoreCase("groups"))
         {
-            sender.sendMessage(new TextComponentString("List of existing Groups:"));
-            sender.sendMessage(new TextComponentString(GroupManager.get_instance().initial.name));
-            sender.sendMessage(new TextComponentString(GroupManager.get_instance().mods.name));
+            sender.sendMessage(new StringTextComponent("List of existing Groups:"));
+            sender.sendMessage(new StringTextComponent(GroupManager.get_instance().initial.name));
+            sender.sendMessage(new StringTextComponent(GroupManager.get_instance().mods.name));
             for (Group g : GroupManager.get_instance().groups)
             {
-                sender.sendMessage(new TextComponentString(g.name));
+                sender.sendMessage(new StringTextComponent(g.name));
             }
             return;
         }
         else if (args[0].equalsIgnoreCase("ListCommands"))
         {
-            sender.sendMessage(new TextComponentString("List of existing commands:"));
+            sender.sendMessage(new StringTextComponent("List of existing commands:"));
             for (ICommand command : FMLCommonHandler.instance().getMinecraftServerInstance().getCommandManager()
                     .getCommands().values())
             {
                 String name = command.getName();
-                sender.sendMessage(new TextComponentString(name + "->" + command.getClass().getName()));
+                sender.sendMessage(new StringTextComponent(name + "->" + command.getClass().getName()));
             }
             return;
         }
@@ -132,12 +132,12 @@ public class GroupInfo extends BaseCommand
             String groupName = args[1];
             Group g = ThutPerms.getGroup(groupName);
             if (g == null) { throw new CommandException("Error, specified Group does not exist."); }
-            sender.sendMessage(new TextComponentString("List of allowed commands:"));
+            sender.sendMessage(new StringTextComponent("List of allowed commands:"));
             for (String s : g.getAllowedCommands())
             {
-                sender.sendMessage(new TextComponentString(s));
+                sender.sendMessage(new StringTextComponent(s));
             }
-            sender.sendMessage(new TextComponentString("all set to: " + g.isAll()));
+            sender.sendMessage(new StringTextComponent("all set to: " + g.isAll()));
             return;
         }
         throw new CommandException(getUsage(sender));

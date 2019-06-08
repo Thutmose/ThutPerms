@@ -15,7 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 
 public class PlayerManager
@@ -120,7 +120,7 @@ public class PlayerManager
         }
     }
 
-    public void unloadPlayer(EntityPlayer player_)
+    public void unloadPlayer(PlayerEntity player_)
     {
         UUID id = player_.getUniqueID();
         Player player = _playerIDMap.get(id);
@@ -162,7 +162,7 @@ public class PlayerManager
         return player;
     }
 
-    public void createPlayer(EntityPlayer player_)
+    public void createPlayer(PlayerEntity player_)
     {
         createPlayer(player_.getUniqueID());
     }

@@ -1,10 +1,10 @@
 package thut.permissions.commands;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import thut.permissions.GroupManager;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
@@ -18,17 +18,17 @@ public class Reload extends BaseCommand
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         ThutPerms.loadPerms();
         GroupManager.get_instance()._server = server;
         // Reload player names, to apply the tags if they exist
-        for (EntityPlayer player : server.getPlayerList().getPlayers())
+        for (PlayerEntity player : server.getPlayerList().getPlayers())
         {
             GroupManager.get_instance()._manager.createPlayer(player);
             player.refreshDisplayName();
         }
-        sender.sendMessage(new TextComponentString("Reloaded Permissions from File"));
+        sender.sendMessage(new StringTextComponent("Reloaded Permissions from File"));
     }
 
 }

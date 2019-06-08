@@ -12,14 +12,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
@@ -132,30 +132,30 @@ public class CommandManager
 
     public static ITextComponent makeFormattedComponent(String text, TextFormatting colour, boolean bold)
     {
-        return new TextComponentString(text).setStyle(new Style().setBold(bold).setColor(colour));
+        return new StringTextComponent(text).setStyle(new Style().setBold(bold).setColor(colour));
     }
 
     public static ITextComponent makeFormattedComponent(String text, TextFormatting colour)
     {
-        return new TextComponentString(text).setStyle(new Style().setColor(colour));
+        return new StringTextComponent(text).setStyle(new Style().setColor(colour));
     }
 
     public static ITextComponent makeFormattedCommandLink(String text, String command, TextFormatting colour,
             boolean bold)
     {
-        return new TextComponentString(text).setStyle(
+        return new StringTextComponent(text).setStyle(
                 new Style().setBold(bold).setColor(colour).setClickEvent(new ClickEvent(Action.RUN_COMMAND, command)));
     }
 
-    public static boolean isOp(ICommandSender sender)
+    public static boolean isOp(ICommandSource sender)
     {
         if (FMLCommonHandler.instance().getMinecraftServerInstance() != null
                 && !FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) { return true; }
 
-        if (sender instanceof EntityPlayer)
+        if (sender instanceof PlayerEntity)
         {
-            EntityPlayer player = sender.getEntityWorld().getPlayerEntityByName(sender.getName());
-            UserListOpsEntry userentry = ((EntityPlayerMP) player).mcServer.getPlayerList().getOppedPlayers()
+            PlayerEntity player = sender.getEntityWorld().getPlayerEntityByName(sender.getName());
+            UserListOpsEntry userentry = ((ServerPlayerEntity) player).mcServer.getPlayerList().getOppedPlayers()
                     .getEntry(player.getGameProfile());
             return userentry != null && userentry.getPermissionLevel() >= 4;
         }

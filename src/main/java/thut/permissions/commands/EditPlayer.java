@@ -5,11 +5,11 @@ import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
 import thut.permissions.Player;
@@ -26,7 +26,7 @@ public class EditPlayer extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <playername> <permission> <value>";
     }
@@ -40,14 +40,14 @@ public class EditPlayer extends BaseCommand
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String playerName = args[0];
         UUID id = null;
         GameProfile profile = null;
         try
         {
-            EntityPlayer test = getPlayer(server, sender, playerName);
+            PlayerEntity test = getPlayer(server, sender, playerName);
             id = test.getUniqueID();
             profile = test.getGameProfile();
         }
@@ -98,10 +98,10 @@ public class EditPlayer extends BaseCommand
 
         if (check)
         {
-            sender.sendMessage(new TextComponentString("Personal Groups for " + player + ":"));
+            sender.sendMessage(new StringTextComponent("Personal Groups for " + player + ":"));
             for (String s : player.groups)
             {
-                sender.sendMessage(new TextComponentString(s));
+                sender.sendMessage(new StringTextComponent(s));
             }
         }
 
@@ -110,7 +110,7 @@ public class EditPlayer extends BaseCommand
             player.setAll(false);
             player.getAllowedCommands().clear();
             player.getBannedCommands().clear();
-            sender.sendMessage(new TextComponentString("Removed personal settings for " + playerName));
+            sender.sendMessage(new StringTextComponent("Removed personal settings for " + playerName));
             manager.savePlayer(id);
             return;
         }
@@ -121,10 +121,10 @@ public class EditPlayer extends BaseCommand
             if (all)
             {
                 sender.sendMessage(
-                        new TextComponentString("All permission state for " + playerName + " is " + player.isAll()));
+                        new StringTextComponent("All permission state for " + playerName + " is " + player.isAll()));
                 return;
             }
-            sender.sendMessage(new TextComponentString(
+            sender.sendMessage(new StringTextComponent(
                     "Permission for " + playerName + " is " + player.hasPermission(permission)));
             return;
         }
@@ -133,7 +133,7 @@ public class EditPlayer extends BaseCommand
         {
             player.setAll(value);
             sender.sendMessage(
-                    new TextComponentString("All permission state for " + playerName + " set to " + player.isAll()));
+                    new StringTextComponent("All permission state for " + playerName + " set to " + player.isAll()));
         }
         else
         {
@@ -147,7 +147,7 @@ public class EditPlayer extends BaseCommand
                 player.getAllowedCommands().remove(permission);
                 if (!player.getBannedCommands().contains(permission)) player.getBannedCommands().add(permission);
             }
-            sender.sendMessage(new TextComponentString(
+            sender.sendMessage(new StringTextComponent(
                     "Permission for " + playerName + " set to " + player.hasPermission(permission)));
         }
         player._init = false;

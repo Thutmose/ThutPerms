@@ -1,15 +1,15 @@
 package thut.permissions.util;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.api.distmarker.Dist;
 import thut.permissions.GroupManager;
 import thut.permissions.ThutPerms;
 
@@ -26,16 +26,16 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactRightClickBlock(PlayerInteractEvent.RightClickBlock evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Dist.CLIENT)
             return;
         World world = evt.getWorld();
-        MinecraftServer server = evt.getEntityPlayer().getServer();
+        MinecraftServer server = evt.getPlayerEntity().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getPlayerEntity()))
         {
             evt.setCanceled(true);
         }
@@ -44,16 +44,16 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactRightClickItem(PlayerInteractEvent.RightClickItem evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Dist.CLIENT)
             return;
         World world = evt.getWorld();
-        MinecraftServer server = evt.getEntityPlayer().getServer();
+        MinecraftServer server = evt.getPlayerEntity().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getPlayerEntity()))
         {
             evt.setCanceled(true);
         }
@@ -66,23 +66,23 @@ public class SpawnProtector
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void interactLeftClickBlock(PlayerInteractEvent.LeftClickBlock evt)
     {
-        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Side.CLIENT)
+        if (!ThutPerms.allCommandUse || evt.getWorld().isRemote || FMLCommonHandler.instance().getSide() == Dist.CLIENT)
             return;
         World world = evt.getWorld();
-        MinecraftServer server = evt.getEntityPlayer().getServer();
+        MinecraftServer server = evt.getPlayerEntity().getServer();
         BlockPos pos = evt.getPos();
         BlockPos blockpos = world.getSpawnPoint();
         int i = MathHelper.abs(pos.getX() - blockpos.getX());
         int j = MathHelper.abs(pos.getZ() - blockpos.getZ());
         int k = Math.max(i, j);
-        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getEntityPlayer()))
+        if (k <= server.getSpawnProtectionSize() && !canEditSpawn(evt.getPlayerEntity()))
         {
             evt.setCanceled(true);
         }
 
     }
 
-    private boolean canEditSpawn(EntityPlayer player)
+    private boolean canEditSpawn(PlayerEntity player)
     {
         return GroupManager.get_instance().hasPermission(player.getUniqueID(), "thutperms.editspawn");
     }

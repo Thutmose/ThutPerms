@@ -1,7 +1,7 @@
 package thut.permissions.commands;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
 import thut.permissions.util.BaseCommand;
 
@@ -14,7 +14,7 @@ public class PlayerInfo extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <player> <arguments>";
     }
@@ -28,7 +28,7 @@ public class PlayerInfo extends BaseCommand
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         // TODO Auto-generated method stub
 

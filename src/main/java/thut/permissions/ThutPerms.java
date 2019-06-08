@@ -21,29 +21,27 @@ import com.google.gson.GsonBuilder;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.permissions.commands.CommandManager;
 import thut.permissions.util.SpawnProtector;
 
-@Mod(modid = ThutPerms.MODID, name = "Thut Permissions", version = ThutPerms.VERSION, dependencies = "after:worldedit", updateJSON = ThutPerms.UPDATEURL, acceptableRemoteVersions = "*", acceptedMinecraftVersions = ThutPerms.MCVERSIONS)
+@Mod(ThutPerms.MODID)
 public class ThutPerms
 {
     public static final String             MODID              = Reference.MODID;
     public static final String             VERSION            = Reference.VERSION;
     public static final String             UPDATEURL          = "";
-
-    public final static String             MCVERSIONS         = "[1.9.4, 1.13]";
 
     public static boolean                  allCommandUse      = false;
     public static File                     configFile         = null;
@@ -101,7 +99,7 @@ public class ThutPerms
     }
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent e)
+    public void preInit(FMLCommonSetupEvent e)
     {
         Configuration config = new Configuration(configFile = e.getSuggestedConfigurationFile());
         File folder = new File(configFile.getParentFile(), "thutperms");
@@ -140,7 +138,7 @@ public class ThutPerms
         }
 
         config.save();
-        if (e.getSide() == Side.CLIENT && manager.SPDiabled)
+        if (e.getSide() == Dist.CLIENT && manager.SPDiabled)
         {
             if (debug) logger.log(Level.INFO, "Disabling on client side as set by config. (preinit)");
             return;
@@ -152,9 +150,9 @@ public class ThutPerms
 
     @Optional.Method(modid = "thutessentials")
     @EventHandler
-    public void thutEssentialsCompat(FMLPreInitializationEvent e)
+    public void thutEssentialsCompat(FMLCommonSetupEvent e)
     {
-        if (e.getSide() == Side.CLIENT && manager.SPDiabled)
+        if (e.getSide() == Dist.CLIENT && manager.SPDiabled)
         {
             if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (tecompat preinit)");
             return;
@@ -165,7 +163,7 @@ public class ThutPerms
     @EventHandler
     public void serverLoad(FMLServerStartedEvent event)
     {
-        if (event.getSide() == Side.CLIENT && manager.SPDiabled)
+        if (event.getSide() == Dist.CLIENT && manager.SPDiabled)
         {
             if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (serverstarted)");
             return;
@@ -189,7 +187,7 @@ public class ThutPerms
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event)
     {
-        if (event.getSide() == Side.CLIENT && manager.SPDiabled)
+        if (event.getSide() == Dist.CLIENT && manager.SPDiabled)
         {
             if (debug) logger.log(Level.INFO, "Disabled on client side as set by config. (server starting)");
             return;
@@ -203,14 +201,14 @@ public class ThutPerms
     void logIn(PlayerLoggedInEvent event)
     {
         PlayerManager manager = GroupManager.get_instance()._manager;
-        manager.createPlayer(event.player);
+        manager.createPlayer(event.getPlayer());
     }
 
     @SubscribeEvent
     void logOut(PlayerLoggedInEvent event)
     {
         PlayerManager manager = GroupManager.get_instance()._manager;
-        manager.unloadPlayer(event.player);
+        manager.unloadPlayer(event.getPlayer());
     }
 
     public static void setAnyCommandUse(MinecraftServer server, boolean enable)

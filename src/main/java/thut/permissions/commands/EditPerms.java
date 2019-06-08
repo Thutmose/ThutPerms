@@ -7,9 +7,9 @@ import java.util.logging.Level;
 import com.google.common.collect.Lists;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import thut.permissions.Group;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
@@ -23,14 +23,14 @@ public class EditPerms extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <group> <perm> <value> or " + super.getUsage(sender)
                 + " allowUse <optional|value> or " + super.getUsage(sender) + " list";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length == 3)
         {
@@ -42,7 +42,7 @@ public class EditPerms extends BaseCommand
             if (command.equalsIgnoreCase("all"))
             {
                 g.setAll(enable);
-                sender.sendMessage(new TextComponentString("Set all Permission for " + groupName + " to " + enable));
+                sender.sendMessage(new StringTextComponent("Set all Permission for " + groupName + " to " + enable));
                 ThutPerms.savePerms();
                 return;
             }
@@ -57,7 +57,7 @@ public class EditPerms extends BaseCommand
                 g.getAllowedCommands().remove(command);
                 if (!g.getBannedCommands().contains(command)) g.getBannedCommands().add(command);
             }
-            sender.sendMessage(new TextComponentString("Set Permission for " + groupName + " " + enable));
+            sender.sendMessage(new StringTextComponent("Set Permission for " + groupName + " " + enable));
             ThutPerms.savePerms();
             return;
         }
@@ -71,13 +71,13 @@ public class EditPerms extends BaseCommand
                 config.load();
                 config.get(Configuration.CATEGORY_GENERAL, "allCommandUse", enable).set(enable);
                 config.save();
-                sender.sendMessage(new TextComponentString(
+                sender.sendMessage(new StringTextComponent(
                         "Set players able to use all commands allowed for their group to " + enable));
                 ThutPerms.savePerms();
                 ThutPerms.setAnyCommandUse(server, enable);
                 return;
             }
-            sender.sendMessage(new TextComponentString(
+            sender.sendMessage(new StringTextComponent(
                     "Players allowed to use all commands for group: " + ThutPerms.allCommandUse));
             return;
         }
@@ -91,12 +91,12 @@ public class EditPerms extends BaseCommand
                 builder.append(s + "\t" + ThutPerms.manager.getNodeDescription(s) + "\t"
                         + ThutPerms.manager.getDefaultPermissionLevel(s) + "\n");
             ThutPerms.logger.log(Level.INFO, builder.toString());
-            sender.sendMessage(new TextComponentString("Logged all registered permissions nodes."));
+            sender.sendMessage(new StringTextComponent("Logged all registered permissions nodes."));
         }
         else if (args[0].equals("toggledebug"))
         {
             ThutPerms.debug = !ThutPerms.debug;
-            sender.sendMessage(new TextComponentString("Debug Mode set to " + ThutPerms.debug));
+            sender.sendMessage(new StringTextComponent("Debug Mode set to " + ThutPerms.debug));
         }
         else throw new CommandException(getUsage(sender));
     }

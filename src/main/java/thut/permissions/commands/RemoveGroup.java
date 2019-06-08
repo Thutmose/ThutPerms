@@ -1,9 +1,9 @@
 package thut.permissions.commands;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import thut.permissions.Group;
 import thut.permissions.GroupManager;
 import thut.permissions.ThutPerms;
@@ -18,13 +18,13 @@ public class RemoveGroup extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <name>";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         String groupName = args[0];
         Group g = ThutPerms.getGroup(groupName);
@@ -34,7 +34,7 @@ public class RemoveGroup extends BaseCommand
         GroupManager.get_instance().groups.remove(g);
         GroupManager.get_instance()._groupNameMap.remove(groupName);
         ThutPerms.savePerms();
-        sender.sendMessage(new TextComponentString("Removed group " + groupName));
+        sender.sendMessage(new StringTextComponent("Removed group " + groupName));
     }
 
 }

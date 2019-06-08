@@ -16,11 +16,11 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -34,7 +34,7 @@ public class PermissionsManager implements IPermissionHandler
 {
     public static final GameProfile                              testProfile          = new GameProfile(
             new UUID(1234567987, 123545787), "_permtest_");
-    public static EntityPlayerMP                                 testPlayer;
+    public static ServerPlayerEntity                                 testPlayer;
     public boolean                                               SPDiabled            = true;
     private static final HashMap<String, DefaultPermissionLevel> PERMISSION_LEVEL_MAP = new HashMap<String, DefaultPermissionLevel>();
     private static final HashMap<String, String>                 DESCRIPTION_MAP      = new HashMap<String, String>();
@@ -93,7 +93,7 @@ public class PermissionsManager implements IPermissionHandler
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null || (SPDiabled && !server.isDedicatedServer())) return;
 
-        testPlayer = new EntityPlayerMP(server, server.getWorld(0), testProfile,
+        testPlayer = new ServerPlayerEntity(server, server.getWorld(0), testProfile,
                 new PlayerInteractionManager(server.getEntityWorld()));
         ThutPerms.setAnyCommandUse(server, false);
         Map<String, ICommand> toWrap = Maps.newHashMap();
@@ -161,16 +161,16 @@ public class PermissionsManager implements IPermissionHandler
     {
         if (event.getSender().getServer() == null || (SPDiabled && !event.getSender().getServer().isDedicatedServer()))
             return;
-        if (event.getSender() instanceof EntityPlayerMP
-                && !canUse(event.getCommand(), (EntityPlayer) event.getSender()))
+        if (event.getSender() instanceof ServerPlayerEntity
+                && !canUse(event.getCommand(), (PlayerEntity) event.getSender()))
         {
             event.getSender().sendMessage(
-                    new TextComponentString("You do not have permission to use " + event.getCommand().getName()));
+                    new StringTextComponent("You do not have permission to use " + event.getCommand().getName()));
             event.setCanceled(true);
         }
     }
 
-    private boolean canUse(ICommand command, EntityPlayer sender)
+    private boolean canUse(ICommand command, PlayerEntity sender)
     {
         if (ThutPerms.debug) ThutPerms.logger.log(Level.INFO, "command use: " + command.getName() + ", "
                 + command.getAliases() + ", " + sender.getGameProfile() + " " + command.getClass());

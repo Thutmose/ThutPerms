@@ -8,11 +8,11 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import thut.permissions.Group;
@@ -82,7 +82,7 @@ public class EditGroup extends BaseCommand
     }
 
     @Override
-    public String getUsage(ICommandSender sender)
+    public String getUsage(ICommandSource sender)
     {
         return super.getUsage(sender) + " <add|reset|clear|!set> <arguments>";
     }
@@ -98,7 +98,7 @@ public class EditGroup extends BaseCommand
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSource sender, String[] args) throws CommandException
     {
         if (args.length >= 3 && args[0].equalsIgnoreCase("!set"))
         {
@@ -115,13 +115,13 @@ public class EditGroup extends BaseCommand
                 if (parent == null) throw new CommandException("No group with name " + parent);
                 if (child == null)
                 {
-                    sender.sendMessage(new TextComponentString(
+                    sender.sendMessage(new StringTextComponent(
                             "No group with name " + childName + ", using player perm instead."));
                     UUID id = null;
                     GameProfile profile = null;
                     try
                     {
-                        EntityPlayer test = getPlayer(server, sender, childName);
+                        PlayerEntity test = getPlayer(server, sender, childName);
                         id = test.getUniqueID();
                         profile = test.getGameProfile();
                     }
@@ -145,7 +145,7 @@ public class EditGroup extends BaseCommand
                 child._parent = parent;
                 child.parentName = parentName;
                 ThutPerms.savePerms();
-                sender.sendMessage(new TextComponentString("Set parent of " + childName + " to " + parentName));
+                sender.sendMessage(new StringTextComponent("Set parent of " + childName + " to " + parentName));
                 return;
             }
             if (args.length >= 3 && (args[1].equals("suffix")))
@@ -163,10 +163,10 @@ public class EditGroup extends BaseCommand
                     }
                 }
                 g.suffix = format(arg);
-                sender.sendMessage(new TextComponentString("Set suffix to " + g.suffix));
+                sender.sendMessage(new StringTextComponent("Set suffix to " + g.suffix));
                 for (UUID id : g.members)
                 {
-                    EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
+                    PlayerEntity player = server.getPlayerList().getPlayerByUUID(id);
                     if (player != null)
                     {
                         player.refreshDisplayName();
@@ -190,10 +190,10 @@ public class EditGroup extends BaseCommand
                     }
                 }
                 g.prefix = format(arg);
-                sender.sendMessage(new TextComponentString("Set prefix to " + g.prefix));
+                sender.sendMessage(new StringTextComponent("Set prefix to " + g.prefix));
                 for (UUID id : g.members)
                 {
-                    EntityPlayer player = server.getPlayerList().getPlayerByUUID(id);
+                    PlayerEntity player = server.getPlayerList().getPlayerByUUID(id);
                     if (player != null)
                     {
                         player.refreshDisplayName();
@@ -215,7 +215,7 @@ public class EditGroup extends BaseCommand
             GameProfile profile = null;
             try
             {
-                EntityPlayer test = getPlayer(server, sender, playerName);
+                PlayerEntity test = getPlayer(server, sender, playerName);
                 id = test.getUniqueID();
                 profile = test.getGameProfile();
             }
@@ -236,8 +236,8 @@ public class EditGroup extends BaseCommand
             if (old != null) old.members.remove(profile.getId());
             GroupManager.get_instance()._groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), groupName);
-            sender.sendMessage(new TextComponentString("Added " + playerName + " to " + groupName));
-            EntityPlayer player = server.getPlayerList().getPlayerByUUID(profile.getId());
+            sender.sendMessage(new StringTextComponent("Added " + playerName + " to " + groupName));
+            PlayerEntity player = server.getPlayerList().getPlayerByUUID(profile.getId());
             if (player != null) player.refreshDisplayName();
             ThutPerms.savePerms();
             return;
@@ -249,7 +249,7 @@ public class EditGroup extends BaseCommand
             GameProfile profile = null;
             try
             {
-                EntityPlayer test = getPlayer(server, sender, playerName);
+                PlayerEntity test = getPlayer(server, sender, playerName);
                 id = test.getUniqueID();
                 profile = test.getGameProfile();
             }
@@ -270,7 +270,7 @@ public class EditGroup extends BaseCommand
             if (old != null) old.members.remove(profile.getId());
             GroupManager.get_instance()._groupIDMap.remove(profile.getId());
             ThutPerms.addToGroup(profile.getId(), GroupManager.get_instance().initial.name);
-            EntityPlayer player = server.getPlayerList().getPlayerByUUID(profile.getId());
+            PlayerEntity player = server.getPlayerList().getPlayerByUUID(profile.getId());
             if (player != null) player.refreshDisplayName();
             ThutPerms.savePerms();
             return;
@@ -285,7 +285,7 @@ public class EditGroup extends BaseCommand
             g.setAll(false);
             g._init = false;
             g.setAll_non_op(true);
-            sender.sendMessage(new TextComponentString("Reset Permissions for " + groupName));
+            sender.sendMessage(new StringTextComponent("Reset Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
         }
@@ -298,7 +298,7 @@ public class EditGroup extends BaseCommand
             g.getBannedCommands().clear();
             g.setAll(false);
             g._init = false;
-            sender.sendMessage(new TextComponentString("Cleared Permissions for " + groupName));
+            sender.sendMessage(new StringTextComponent("Cleared Permissions for " + groupName));
             ThutPerms.savePerms();
             return;
         }
