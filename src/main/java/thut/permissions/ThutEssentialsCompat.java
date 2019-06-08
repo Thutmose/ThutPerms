@@ -1,6 +1,6 @@
 package thut.permissions;
 
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import thut.essentials.events.NameEvent;
 
 public class ThutEssentialsCompat

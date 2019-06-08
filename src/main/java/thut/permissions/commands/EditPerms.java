@@ -10,7 +10,6 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.common.config.Configuration;
 import thut.permissions.Group;
 import thut.permissions.ThutPerms;
 import thut.permissions.util.BaseCommand;
