@@ -1,0 +1,13 @@
+{
+    "_comment": "ThutPerms Language Properties",
+    "_comment": "@author Thutmose",
+    
+    "thutperms.group.exists": "§cThat Group Already Exists!",
+    "thutperms.group.created": "§aCreated group §6%s",
+    
+    "thutperms.reloaded": "§aReloaded permissions from file",
+    
+    "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log"
+    
+    
+}

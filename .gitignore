@@ -16,7 +16,6 @@ out
 # gradle
 build
 .gradle
-src/main/java/test/*
 
 # other
 eclipse
