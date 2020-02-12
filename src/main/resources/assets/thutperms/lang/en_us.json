@@ -5,6 +5,12 @@
     "thutperms.group.exists": "§cThat Group Already Exists!",
     "thutperms.group.created": "§aCreated group §6%s",
     
+    "thutperms.group.added": "§aAdded §6%1$s§a to group §6%2$s",
+    "thutperms.group.removed": "§aRemoved §6%1$s§a from group §6%2$s",
+    
+    "thutperms.group.already_in": "§6%1$s§c is already in §6%2$s§c!",
+    "thutperms.group.not_in": "§6%1$s§c was not in §6%2$s§c!",
+    
     "thutperms.reloaded": "§aReloaded permissions from file",
     
     "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log"

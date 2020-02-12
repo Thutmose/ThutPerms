@@ -1,6 +1,7 @@
 package thut.perms.commands;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
@@ -16,14 +17,10 @@ import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
 import thut.perms.management.Group;
+import thut.perms.management.GroupManager;
 
 public class EditGroup
 {
-    private static SuggestionProvider<CommandSource> ADD    = (ctx, sb) -> net.minecraft.command.ISuggestionProvider
-            .suggest(Lists.newArrayList("add"), sb);
-    private static SuggestionProvider<CommandSource> REMOVE = (ctx, sb) -> net.minecraft.command.ISuggestionProvider
-            .suggest(Lists.newArrayList("remove"), sb);
-
     public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
     {
         final String name = "edit_group";
@@ -31,29 +28,35 @@ public class EditGroup
         PermissionAPI.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
                 "Can the player edit a permissions group.");
 
+        final java.util.List<String> names = Lists.newArrayList();
+        for (final Group g : Lists.newArrayList(GroupManager.get_instance().groups))
+            names.add(g.name);
+        names.add(GroupManager.get_instance().initial.name);
+        names.add(GroupManager.get_instance().mods.name);
+        Collections.sort(names);
+
+        final SuggestionProvider<CommandSource> GROUPS = (ctx, sb) -> net.minecraft.command.ISuggestionProvider.suggest(
+                names, sb);
+
+        final SuggestionProvider<CommandSource> ADDREM = (ctx, sb) -> net.minecraft.command.ISuggestionProvider.suggest(
+                Lists.newArrayList("add", "remove"), sb);
+
         // Setup with name and permission
         LiteralArgumentBuilder<CommandSource> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
                 perm));
 
         // Set up the command's arguments
-        command = command.then(Commands.argument("group", StringArgumentType.string())).then(Commands.argument("add",
-                StringArgumentType.string()).suggests(EditGroup.ADD).then(Commands.argument("player",
-                        GameProfileArgument.gameProfile()).executes(ctx -> EditGroup.executeAdd(ctx.getSource(),
-                                StringArgumentType.getString(ctx, "group"), GameProfileArgument.getGameProfiles(ctx,
-                                        "player")))));
-
-        // Actually register the command.
-        commandDispatcher.register(command);
-
-        command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs, perm));
-
-        // Set up the command's arguments
-        command = command.then(Commands.argument("group", StringArgumentType.string())).then(Commands.argument("remove",
-                StringArgumentType.string()).suggests(EditGroup.REMOVE).then(Commands.argument("player",
-                        GameProfileArgument.gameProfile()).executes(ctx -> EditGroup.executeRemove(ctx.getSource(),
-                                StringArgumentType.getString(ctx, "group"), GameProfileArgument.getGameProfiles(ctx,
-                                        "player")))));
-
+        //@formatter:off
+        command = command.then(Commands.argument("group", StringArgumentType.string()).suggests(GROUPS)
+                .then(Commands.argument("add", StringArgumentType.string()).suggests(ADDREM)
+                    .then(Commands.argument("player", GameProfileArgument.gameProfile())
+                        .executes(ctx ->
+                        StringArgumentType.getString(ctx, "add").equals("add")?
+                            EditGroup.executeAdd(ctx.getSource(), StringArgumentType.getString(ctx, "group"),
+                                                GameProfileArgument.getGameProfiles(ctx, "player")):
+                            EditGroup.executeRemove(ctx.getSource(), StringArgumentType.getString(ctx, "group"),
+                                                    GameProfileArgument.getGameProfiles(ctx, "player"))))));
+        //@formatter:on
         // Actually register the command.
         commandDispatcher.register(command);
     }
@@ -70,11 +73,14 @@ public class EditGroup
         for (final GameProfile profile : players)
             try
             {
-                g.members.add(profile.getId());
-                Perms.savePerms();
                 String name = profile.getName();
                 if (name == null) name = profile.getId().toString();
-                Perms.config.sendFeedback(source, "thutperms.group.add", true, groupName, name);
+                if (g.members.add(profile.getId()))
+                {
+                    Perms.savePerms();
+                    Perms.config.sendFeedback(source, "thutperms.group.added", true, name, groupName);
+                }
+                else Perms.config.sendFeedback(source, "thutperms.group.already_in", true, name, groupName);
             }
             catch (final IllegalArgumentException e)
             {
@@ -95,11 +101,14 @@ public class EditGroup
         for (final GameProfile profile : players)
             try
             {
-                g.members.remove(profile.getId());
-                Perms.savePerms();
                 String name = profile.getName();
                 if (name == null) name = profile.getId().toString();
-                Perms.config.sendFeedback(source, "thutperms.group.add", true, groupName, name);
+                if (g.members.remove(profile.getId()))
+                {
+                    Perms.savePerms();
+                    Perms.config.sendFeedback(source, "thutperms.group.removed", true, name, groupName);
+                }
+                else Perms.config.sendFeedback(source, "thutperms.group.not_in", true, name, groupName);
             }
             catch (final IllegalArgumentException e)
             {
