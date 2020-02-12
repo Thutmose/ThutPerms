@@ -10,8 +10,8 @@ import com.google.common.collect.Maps;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import thut.essentials.config.Config.ConfigData;
-import thut.essentials.config.Configure;
+import thut.perms.config.Config.ConfigData;
+import thut.perms.config.Configure;
 import thut.perms.management.GroupManager;
 
 public class Config extends ConfigData

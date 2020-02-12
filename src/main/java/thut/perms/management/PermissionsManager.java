@@ -31,9 +31,9 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.context.IContext;
-import thut.essentials.commands.CommandManager;
 import thut.perms.Perms;
 import thut.perms.commands.AddGroup;
+import thut.perms.commands.CommandManager;
 import thut.perms.commands.List;
 import thut.perms.commands.Reload;
 

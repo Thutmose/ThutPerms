@@ -77,7 +77,7 @@ public class Perms
         logger.addAppender(appender);
         appender.start();
 
-        thut.essentials.config.Config.setupConfigs(Perms.config, Perms.MODID, Perms.MODID);
+        thut.perms.config.Config.setupConfigs(Perms.config, Perms.MODID, Perms.MODID);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
