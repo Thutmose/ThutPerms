@@ -9,8 +9,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import thut.perms.Perms;
+import thut.perms.management.names.Prefix;
+import thut.perms.management.names.Suffix;
 
 public class GroupManager
 {
@@ -48,6 +51,20 @@ public class GroupManager
     {
         Perms.LOGGER.info("Initializing Group Manager.");
         this._manager = new PlayerManager(this);
+    }
+
+    public void updateName(final ServerPlayerEntity player)
+    {
+        final Group g = this.getPlayerGroup(player.getUniqueID());
+        final Player p = this._manager.getPlayer(player.getUniqueID());
+
+        player.getPrefixes().removeIf(c -> c instanceof Prefix);
+        player.getSuffixes().removeIf(c -> c instanceof Suffix);
+
+        if (!p.prefix.isEmpty()) player.getPrefixes().add(new Prefix(p.prefix));
+        if (!g.prefix.isEmpty()) player.getPrefixes().add(new Prefix(g.prefix));
+        if (!g.suffix.isEmpty()) player.getSuffixes().add(new Suffix(g.suffix));
+        if (!p.suffix.isEmpty()) player.getSuffixes().add(new Suffix(p.suffix));
     }
 
     public void init()

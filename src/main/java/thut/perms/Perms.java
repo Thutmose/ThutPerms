@@ -116,7 +116,11 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayerEntity) manager.createPlayer(event.getPlayer().getUniqueID());
+        if (event.getPlayer() instanceof ServerPlayerEntity)
+        {
+            manager.createPlayer(event.getPlayer().getUniqueID());
+            GroupManager.get_instance().updateName((ServerPlayerEntity) event.getPlayer());
+        }
     }
 
     @SubscribeEvent

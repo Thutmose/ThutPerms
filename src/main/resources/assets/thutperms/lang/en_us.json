@@ -8,6 +8,9 @@
     "thutperms.group.added": "§aAdded §6%1$s§a to group §6%2$s",
     "thutperms.group.removed": "§aRemoved §6%1$s§a from group §6%2$s",
     
+    "thutperms.suffix.set": "§6%1$s§a was given the suffix §6%2$s",
+    "thutperms.prefix.set": "§6%1$s§a was given the prefix §6%2$s",
+    
     "thutperms.group.already_in": "§6%1$s§c is already in §6%2$s§c!",
     "thutperms.group.not_in": "§6%1$s§c was not in §6%2$s§c!",
     

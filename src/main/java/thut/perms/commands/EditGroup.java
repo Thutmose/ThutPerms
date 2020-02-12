@@ -5,8 +5,10 @@ import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
@@ -38,27 +40,47 @@ public class EditGroup
         final SuggestionProvider<CommandSource> GROUPS = (ctx, sb) -> net.minecraft.command.ISuggestionProvider.suggest(
                 names, sb);
 
-        final SuggestionProvider<CommandSource> ADDREM = (ctx, sb) -> net.minecraft.command.ISuggestionProvider.suggest(
-                Lists.newArrayList("add", "remove"), sb);
-
-        // Setup with name and permission
-        LiteralArgumentBuilder<CommandSource> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
-                perm));
-
-        // Set up the command's arguments
-        //@formatter:off
-        command = command.then(Commands.argument("group", StringArgumentType.string()).suggests(GROUPS)
-                .then(Commands.argument("add", StringArgumentType.string()).suggests(ADDREM)
-                    .then(Commands.argument("player", GameProfileArgument.gameProfile())
-                        .executes(ctx ->
-                        StringArgumentType.getString(ctx, "add").equals("add")?
-                            EditGroup.executeAdd(ctx.getSource(), StringArgumentType.getString(ctx, "group"),
-                                                GameProfileArgument.getGameProfiles(ctx, "player")):
-                            EditGroup.executeRemove(ctx.getSource(), StringArgumentType.getString(ctx, "group"),
-                                                    GameProfileArgument.getGameProfiles(ctx, "player"))))));
+        // Setup with name and permission @formatter:off
+        final LiteralArgumentBuilder<CommandSource> add = Commands.literal(name)
+                .requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("group",
+                        StringArgumentType.string()).suggests(GROUPS)
+                .then(EditGroup.add(commandDispatcher)));
         //@formatter:on
-        // Actually register the command.
-        commandDispatcher.register(command);
+        commandDispatcher.register(add);
+
+        // Setup with name and permission @formatter:off
+        final LiteralArgumentBuilder<CommandSource> remove = Commands.literal(name)
+                .requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("group",
+                        StringArgumentType.string()).suggests(GROUPS)
+                .then(EditGroup.remove(commandDispatcher)));
+        //@formatter:on
+        commandDispatcher.register(remove);
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> add(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_group.add", DefaultPermissionLevel.OP,
+                "Can the player add players to a group.");
+
+        final Command<CommandSource> cmd = ctx -> EditGroup.executeAdd(ctx.getSource(), StringArgumentType.getString(
+                ctx, "group"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("add").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("player",
+                GameProfileArgument.gameProfile()).executes(cmd));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> remove(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_group.remove", DefaultPermissionLevel.OP,
+                "Can the player remove players from a group.");
+
+        final Command<CommandSource> cmd = ctx -> EditGroup.executeRemove(ctx.getSource(), StringArgumentType.getString(
+                ctx, "group"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("remove").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
+                "player", GameProfileArgument.gameProfile()).executes(cmd));
     }
 
     private static int executeAdd(final CommandSource source, final String groupName,

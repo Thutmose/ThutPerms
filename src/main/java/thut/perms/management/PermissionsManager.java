@@ -35,6 +35,7 @@ import thut.perms.Perms;
 import thut.perms.commands.AddGroup;
 import thut.perms.commands.CommandManager;
 import thut.perms.commands.EditGroup;
+import thut.perms.commands.EditPlayer;
 import thut.perms.commands.List;
 import thut.perms.commands.Reload;
 
@@ -128,6 +129,7 @@ public class PermissionsManager implements IPermissionHandler
     {
         AddGroup.register(event.getCommandDispatcher());
         EditGroup.register(event.getCommandDispatcher());
+        EditPlayer.register(event.getCommandDispatcher());
         List.register(event.getCommandDispatcher());
         Reload.register(event.getCommandDispatcher());
 
