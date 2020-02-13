@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -39,13 +40,8 @@ public class Reload
         Perms.loadPerms();
         GroupManager.get_instance()._server = server;
         // Reload player names, to apply the tags if they exist
-        // for (final ServerPlayerEntity player :
-        // server.getPlayerList().getPlayers())
-        // {
-        // // GroupManager.get_instance()._manager.createPlayer(player);
-        // // player.refreshDisplayName();//Displayname not implemented in
-        // // forge yet. FIXME get this working.
-        // }
+        for (final ServerPlayerEntity player : server.getPlayerList().getPlayers())
+            GroupManager.get_instance().updateName(player);
         return 0;
     }
 }
