@@ -1,15 +1,26 @@
 package thut.perms;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.loading.FMLPaths;
 import thut.perms.config.Config.ConfigData;
 import thut.perms.config.Configure;
 import thut.perms.management.GroupManager;
@@ -32,11 +43,14 @@ public class Config extends ConfigData
     public List<String> command_alternates = Lists.newArrayList();
 
     @Configure(category = "general")
-    public List<String> lang_overrides = Lists.newArrayList();
+    public String lang_file = "en_us.json";
+
+    private final Path configpath;
 
     public Config()
     {
         super(Perms.MODID);
+        this.configpath = FMLPaths.CONFIGDIR.get().resolve(Perms.MODID);
     }
 
     private final Map<String, String> command_map = Maps.newHashMap();
@@ -70,17 +84,28 @@ public class Config extends ConfigData
             if (args.length != 2) Perms.LOGGER.warn("Invalid command rename: {}, it must be of form \"<old>:<new>\"");
             else this.command_map.put(args[0], args[1]);
         }
-        for (final String s : this.lang_overrides)
+
+        final File file = this.configpath.resolve(this.lang_file).toFile();
+        if (file.exists()) try
         {
-            final String[] args = s.split(":");
-            if (args.length < 2) Perms.LOGGER.warn("Invalid lang override: {}, it must be of form \"<key>:<value>\"");
-            else
-            {
-                String value = args[1];
-                for (int i = 2; i < args.length; i++)
-                    value = value + ":" + args[i];
-                this.lang_overrides_map.put(args[0], value);
-            }
+            final BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
+            final Gson gson = new GsonBuilder().create();
+            final JsonObject o = gson.fromJson(in, JsonObject.class);
+            for (final Entry<String, JsonElement> entry : o.entrySet())
+                try
+                {
+                    final String key = entry.getKey();
+                    final String value = entry.getValue().getAsString();
+                    this.lang_overrides_map.put(key, value);
+                }
+                catch (final Exception e)
+                {
+                    Perms.LOGGER.error("Error with keypair {}, {}", entry.getKey(), entry.getValue());
+                }
+        }
+        catch (final Exception e)
+        {
+            Perms.LOGGER.error("Error loading lang json from config!", e);
         }
         for (final String s : this.command_alternates)
         {
