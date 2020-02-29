@@ -42,7 +42,11 @@ public class EditPlayer
                 .requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("player",
                         GameProfileArgument.gameProfile())
                 .then(EditPlayer.prefix(commandDispatcher))
-                .then(EditPlayer.suffix(commandDispatcher)));
+                .then(EditPlayer.suffix(commandDispatcher))
+                .then(EditPlayer.add_perm(commandDispatcher))
+                .then(EditPlayer.remove_perm(commandDispatcher))
+                .then(EditPlayer.deny_perm(commandDispatcher))
+                .then(EditPlayer.un_deny(commandDispatcher)));
         //@formatter:on
         commandDispatcher.register(command);
     }
@@ -71,6 +75,54 @@ public class EditPlayer
 
         return Commands.literal("suffix").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "words", StringArgumentType.greedyString()).executes(cmd));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> add_perm(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_player.add", DefaultPermissionLevel.OP,
+                "Can the player add perms for another player.");
+        final Command<CommandSource> cmd = ctx -> EditPlayer.executeAddPerm(ctx.getSource(), StringArgumentType
+                .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("add_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
+                "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> remove_perm(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_player.remove", DefaultPermissionLevel.OP,
+                "Can the player remove perms for another player.");
+        final Command<CommandSource> cmd = ctx -> EditPlayer.executeRemovePerm(ctx.getSource(), StringArgumentType
+                .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("remove_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
+                "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> deny_perm(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_player.deny", DefaultPermissionLevel.OP,
+                "Can the player deny perms for another player.");
+        final Command<CommandSource> cmd = ctx -> EditPlayer.executeDenyPerm(ctx.getSource(), StringArgumentType
+                .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
+                "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
+    }
+
+    private static ArgumentBuilder<CommandSource, ?> un_deny(final CommandDispatcher<CommandSource> dispatcher)
+    {
+        String perm;
+        PermissionAPI.registerNode(perm = "command.edit_player.un_deny", DefaultPermissionLevel.OP,
+                "Can the player undeny perms for another player.");
+        final Command<CommandSource> cmd = ctx -> EditPlayer.executeUnDenyPerm(ctx.getSource(), StringArgumentType
+                .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
+
+        return Commands.literal("un_deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
+                "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
     private static int executePrefix(final CommandSource source, final String prefix,
@@ -103,6 +155,58 @@ public class EditPlayer
             final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(profile.getId());
             if (player != null) GroupManager.get_instance().updateName(player);
             Perms.config.sendFeedback(source, "thutperms.suffix.set", true, profile.getName(), suffix);
+        }
+        return 0;
+    }
+
+    private static int executeAddPerm(final CommandSource source, final String perm,
+            final Collection<GameProfile> players)
+    {
+        if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
+        for (final GameProfile profile : players)
+        {
+            final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
+            p.allowedCommands.add(perm);
+            Perms.config.sendFeedback(source, "thutperms.perm.added", true, profile.getName(), perm);
+        }
+        return 0;
+    }
+
+    private static int executeRemovePerm(final CommandSource source, final String perm,
+            final Collection<GameProfile> players)
+    {
+        if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
+        for (final GameProfile profile : players)
+        {
+            final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
+            p.allowedCommands.remove(perm);
+            Perms.config.sendFeedback(source, "thutperms.perm.removed", true, profile.getName(), perm);
+        }
+        return 0;
+    }
+
+    private static int executeDenyPerm(final CommandSource source, final String perm,
+            final Collection<GameProfile> players)
+    {
+        if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
+        for (final GameProfile profile : players)
+        {
+            final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
+            p.bannedCommands.add(perm);
+            Perms.config.sendFeedback(source, "thutperms.perm.denied", true, profile.getName(), perm);
+        }
+        return 0;
+    }
+
+    private static int executeUnDenyPerm(final CommandSource source, final String perm,
+            final Collection<GameProfile> players)
+    {
+        if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
+        for (final GameProfile profile : players)
+        {
+            final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
+            p.bannedCommands.remove(perm);
+            Perms.config.sendFeedback(source, "thutperms.perm.undenied", true, profile.getName(), perm);
         }
         return 0;
     }
