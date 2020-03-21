@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 public class Player extends PermissionsHolder
 {
     public UUID         id;
+    public String       name    = "";
     public String       prefix  = "";
     public String       suffix  = "";
     public List<String> groups  = Lists.newArrayList();
