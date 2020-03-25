@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -31,6 +32,7 @@ import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.management.Group;
 import thut.perms.management.GroupManager;
 import thut.perms.management.PermissionsManager;
+import thut.perms.management.Player;
 import thut.perms.management.PlayerManager;
 
 @Mod(Perms.MODID)
@@ -118,13 +120,15 @@ public class Perms
         final PlayerManager manager = GroupManager.get_instance()._manager;
         if (event.getPlayer() instanceof ServerPlayerEntity)
         {
-            manager.createPlayer(event.getPlayer().getUniqueID());
+            final Player player = manager.createPlayer(event.getPlayer().getUniqueID());
+            player.name = event.getPlayer().getDisplayName().getFormattedText();
+            manager.savePlayer(player.id);
             GroupManager.get_instance().updateName((ServerPlayerEntity) event.getPlayer());
         }
     }
 
     @SubscribeEvent
-    void logOut(final PlayerLoggedInEvent event)
+    void logOut(final PlayerLoggedOutEvent event)
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;

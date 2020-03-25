@@ -178,6 +178,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.allowedCommands.add(perm);
+        Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.added", true, groupName, perm);
         return 0;
     }
@@ -193,6 +194,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.allowedCommands.remove(perm);
+        Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.removed", true, groupName, perm);
         return 0;
     }
@@ -208,6 +210,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.bannedCommands.add(perm);
+        Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.denied", true, groupName, perm);
         return 0;
     }
@@ -223,6 +226,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.bannedCommands.remove(perm);
+        Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.undenied", true, groupName, perm);
         return 0;
     }
