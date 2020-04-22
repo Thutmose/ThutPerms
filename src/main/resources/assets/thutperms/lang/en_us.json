@@ -2,6 +2,9 @@
     "_comment": "ThutPerms Language Properties",
     "_comment": "@author Thutmose",
     
+    
+    "_comment": "group creation messages",
+    
     "thutperms.group.exists": "§cThat Group Already Exists!",
     "thutperms.group.created": "§aCreated group §6%s",
     
@@ -9,14 +12,30 @@
     "thutperms.group.removed": "§aRemoved §6%1$s§a from group §6%2$s",
     
     "thutperms.suffix.set": "§6%1$s§a was given the suffix §6%2$s",
-    "thutperms.prefix.set": "§6%1$s§a was given the prefix §6%2$s",
+    "thutperms.prefix.set": "§6%1$s§a was given the prefix §6%2$s"
+    
+    "_comment": "error messages",
     
     "thutperms.group.already_in": "§6%1$s§c is already in §6%2$s§c!",
     "thutperms.group.not_in": "§6%1$s§c was not in §6%2$s§c!",
     
+    "thutperms.nogroup": "§cGroup §6%s§c does not exist!",
+    "thutperms.perm.unknownperm": "§cNo Perm by name §6%s§c is registered!",
+    
+    
+    "_comment": "add/removal messages",
+    
+    "thutperms.perm.removed": "§aRemoved perm §6%1$s§a from §6%2$s§a",
+    "thutperms.perm.added": "§aAdded perm §6%1$s§a for §6%2$s§a",
+    
+    "thutperms.perm.undenied": "§aRemoved perm §6%1$s§a from the blacklist for §6%2$s§a",
+    "thutperms.perm.denied": "§aAdded perm §6%1$s§a to the blacklist for §6%2$s§a",
+    
+    
+    "_comment": "misc messages",
+    
     "thutperms.reloaded": "§aReloaded permissions from file",
     
-    "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log"
-    
+    "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log",
     
 }
