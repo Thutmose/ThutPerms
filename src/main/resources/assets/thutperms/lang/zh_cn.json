@@ -1,0 +1,41 @@
+{
+    "_comment": "ThutPerms Language Properties",
+    "_comment": "@author Thutmose",
+    
+    
+    "_comment": "group creation messages",
+    
+    "thutperms.group.exists": "§c该权限组已存在!",
+    "thutperms.group.created": "§a创建权限组 §6%s",
+    
+    "thutperms.group.added": "§a添加 §6%1$s§a 到 §6%2$s",
+    "thutperms.group.removed": "§a移除 §6%1$s§a 从 §6%2$s",
+    
+    "thutperms.suffix.set": "§6%1$s§a 被给予后绰 §6%2$s",
+    "thutperms.prefix.set": "§6%1$s§a 被给予前绰 §6%2$s",
+    
+    "_comment": "error messages",
+    
+    "thutperms.group.already_in": "§6%1$s§c 已经在 §6%2$s§c!",
+    "thutperms.group.not_in": "§6%1$s§c 不在 §6%2$s§c!",
+    
+    "thutperms.nogroup": "§c权限组 §6%s§c 不存在!",
+    "thutperms.perm.unknownperm": "§c没有权限节点名为 §6%s§c 被注册!",
+    
+    
+    "_comment": "add/removal messages",
+    
+    "thutperms.perm.removed": "§a移除权限 §6%1$s§a 从 §6%2$s§a",
+    "thutperms.perm.added": "§a添加权限 §6%1$s§a f到 §6%2$s§a",
+    
+    "thutperms.perm.undenied": "§a移除权限 §6%1$s§a 从黑名单从 §6%2$s§a",
+    "thutperms.perm.denied": "§a添加权限 §6%1$s§a 到黑名单给 §6%2$s§a",
+    
+    
+    "_comment": "misc messages",
+    
+    "thutperms.reloaded": "§a重载权限",
+    
+    "thutperms.perms.logged": "§a所有权限节点已被存储至 thutperms.log",
+    
+}
