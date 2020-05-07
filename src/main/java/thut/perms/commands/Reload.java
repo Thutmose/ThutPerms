@@ -39,9 +39,15 @@ public class Reload
         final MinecraftServer server = source.getServer();
         Perms.loadPerms();
         GroupManager.get_instance()._server = server;
-        // Reload player names, to apply the tags if they exist
+
+        // Refresh things for the players
         for (final ServerPlayerEntity player : server.getPlayerList().getPlayers())
+        {
+            // Reload player names, to apply the tags if they exist
             GroupManager.get_instance().updateName(player);
+            // Update their command lists
+            server.getCommandManager().send(player);
+        }
         return 0;
     }
 }

@@ -167,6 +167,7 @@ public class EditPlayer
         {
             final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
             p.allowedCommands.add(perm);
+            p.onUpdated(source.getServer());
             Perms.config.sendFeedback(source, "thutperms.perm.added", true, profile.getName(), perm);
         }
         return 0;
@@ -180,6 +181,7 @@ public class EditPlayer
         {
             final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
             p.allowedCommands.remove(perm);
+            p.onUpdated(source.getServer());
             Perms.config.sendFeedback(source, "thutperms.perm.removed", true, profile.getName(), perm);
         }
         return 0;
@@ -193,6 +195,7 @@ public class EditPlayer
         {
             final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
             p.bannedCommands.add(perm);
+            p.onUpdated(source.getServer());
             Perms.config.sendFeedback(source, "thutperms.perm.denied", true, profile.getName(), perm);
         }
         return 0;
@@ -206,6 +209,7 @@ public class EditPlayer
         {
             final Player p = GroupManager.get_instance()._manager.getPlayer(profile.getId());
             p.bannedCommands.remove(perm);
+            p.onUpdated(source.getServer());
             Perms.config.sendFeedback(source, "thutperms.perm.undenied", true, profile.getName(), perm);
         }
         return 0;

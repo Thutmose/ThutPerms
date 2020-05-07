@@ -12,7 +12,7 @@
     "thutperms.group.removed": "§aRemoved §6%1$s§a from group §6%2$s",
     
     "thutperms.suffix.set": "§6%1$s§a was given the suffix §6%2$s",
-    "thutperms.prefix.set": "§6%1$s§a was given the prefix §6%2$s"
+    "thutperms.prefix.set": "§6%1$s§a was given the prefix §6%2$s",
     
     "_comment": "error messages",
     
@@ -36,6 +36,6 @@
     
     "thutperms.reloaded": "§aReloaded permissions from file",
     
-    "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log",
+    "thutperms.perms.logged": "§aA Table of all known permissions was saved to thutperms.log"
     
 }

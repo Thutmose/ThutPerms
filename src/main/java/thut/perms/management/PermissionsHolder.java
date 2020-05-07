@@ -4,20 +4,26 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import thut.perms.Perms;
 
 public abstract class PermissionsHolder
 {
-    public boolean           all             = false;
-    public boolean           all_non_op      = true;
-    public List<String>      allowedCommands = Lists.newArrayList();
-    public List<String>      bannedCommands  = Lists.newArrayList();
-    public String            parentName      = null;
+    public String  name       = "";
+    public String  prefix     = "";
+    public String  suffix     = "";
+    public boolean all        = false;
+    public boolean all_non_op = true;
+    public String  parentName = null;
+
+    public List<String> allowedCommands = Lists.newArrayList();
+    public List<String> bannedCommands  = Lists.newArrayList();
+
     public PermissionsHolder _parent;
     protected List<String>   _whiteWildCards;
     protected List<String>   _blackWildCards;
-    public boolean           _init           = false;
+    public boolean           _init = false;
 
     private void init()
     {
@@ -33,6 +39,8 @@ public abstract class PermissionsHolder
             if (s.endsWith("*")) this._blackWildCards.add(s.substring(0, s.length() - 1));
             else if (s.startsWith("*")) this._blackWildCards.add(s.substring(1));
     }
+
+    public abstract void onUpdated(MinecraftServer server);
 
     public List<String> getAllowedCommands()
     {

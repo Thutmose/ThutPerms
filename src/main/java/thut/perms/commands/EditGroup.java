@@ -15,6 +15,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
@@ -129,6 +130,9 @@ public class EditGroup
                 {
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.added", true, name, groupName);
+                    final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile
+                            .getId());
+                    if (player != null) source.getServer().getCommandManager().send(player);
                 }
                 else Perms.config.sendFeedback(source, "thutperms.group.already_in", true, name, groupName);
             }
@@ -157,6 +161,9 @@ public class EditGroup
                 {
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.removed", true, name, groupName);
+                    final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile
+                            .getId());
+                    if (player != null) source.getServer().getCommandManager().send(player);
                 }
                 else Perms.config.sendFeedback(source, "thutperms.group.not_in", true, name, groupName);
             }
@@ -178,6 +185,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.allowedCommands.add(perm);
+        g.onUpdated(source.getServer());
         Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.added", true, groupName, perm);
         return 0;
@@ -194,6 +202,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.allowedCommands.remove(perm);
+        g.onUpdated(source.getServer());
         Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.removed", true, groupName, perm);
         return 0;
@@ -210,6 +219,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.bannedCommands.add(perm);
+        g.onUpdated(source.getServer());
         Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.denied", true, groupName, perm);
         return 0;
@@ -226,6 +236,7 @@ public class EditGroup
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
 
         g.bannedCommands.remove(perm);
+        g.onUpdated(source.getServer());
         Perms.savePerms();
         Perms.config.sendFeedback(source, "thutperms.perm.undenied", true, groupName, perm);
         return 0;

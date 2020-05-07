@@ -5,12 +5,13 @@ import java.util.UUID;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
+
 public class Player extends PermissionsHolder
 {
-    public UUID         id;
-    public String       name    = "";
-    public String       prefix  = "";
-    public String       suffix  = "";
+    public UUID id;
+
     public List<String> groups  = Lists.newArrayList();
     public List<Group>  _groups = Lists.newArrayList();
 
@@ -54,5 +55,12 @@ public class Player extends PermissionsHolder
     public boolean isAll_non_op()
     {
         return false;
+    }
+
+    @Override
+    public void onUpdated(final MinecraftServer server)
+    {
+        final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(this.id);
+        if (player != null) server.getCommandManager().send(player);
     }
 }
