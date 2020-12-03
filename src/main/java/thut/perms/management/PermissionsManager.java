@@ -23,11 +23,11 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.context.IContext;
@@ -125,17 +125,18 @@ public class PermissionsManager implements IPermissionHandler
         return level == null ? DefaultPermissionLevel.NONE : level;
     }
 
-    public void onServerStarting(final FMLServerStartingEvent event)
+    public void onRegisterCommands(final RegisterCommandsEvent event)
     {
-        AddGroup.register(event.getCommandDispatcher());
-        EditGroup.register(event.getCommandDispatcher());
-        EditPlayer.register(event.getCommandDispatcher());
-        List.register(event.getCommandDispatcher());
-        Reload.register(event.getCommandDispatcher());
+        AddGroup.register(event.getDispatcher());
+        EditGroup.register(event.getDispatcher());
+        EditPlayer.register(event.getDispatcher());
+        List.register(event.getDispatcher());
+        Reload.register(event.getDispatcher());
+    }
 
-        final MinecraftServer server = event.getServer();
-        if (server == null || this.SPDiabled && server.isSinglePlayer()) return;
-        this.wrapCommands(server, event.getCommandDispatcher());
+    public void wrapCommands(final MinecraftServer server)
+    {
+        this.wrapCommands(server, server.getCommandManager().getDispatcher());
     }
 
     private void wrap_children(final CommandNode<CommandSource> node, final String lastNode,
@@ -225,8 +226,8 @@ public class PermissionsManager implements IPermissionHandler
         // shouldn't be null, but might be if something goes funny connecting to
         // servers.
         if (server == null) return;
-        PermissionsManager.testPlayer = FakePlayerFactory.get(server.getWorld(DimensionType.OVERWORLD),
-                PermissionsManager.testProfile);
+        PermissionsManager.testPlayer = FakePlayerFactory.get(server.getWorld(
+                World.OVERWORLD), PermissionsManager.testProfile);
 
         this.renames.clear();
         final CommandNode<CommandSource> root = commandDispatcher.getRoot();

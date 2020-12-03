@@ -86,6 +86,7 @@ public class Perms
         thut.perms.config.Config.setupConfigs(Perms.config, Perms.MODID, Perms.MODID);
 
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(Perms.manager::onRegisterCommands);
 
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(
                 () -> FMLNetworkConstants.IGNORESERVERONLY, (in, net) -> true));
@@ -111,7 +112,7 @@ public class Perms
         if (Perms.config.disabled) return;
         Perms.loadPerms();
         GroupManager.get_instance()._server = event.getServer();
-        Perms.manager.onServerStarting(event);
+        Perms.manager.wrapCommands(event.getServer());
     }
 
     @SubscribeEvent
@@ -128,7 +129,7 @@ public class Perms
         if (event.getPlayer() instanceof ServerPlayerEntity)
         {
             final Player player = manager.createPlayer(event.getPlayer().getUniqueID());
-            player.name = event.getPlayer().getDisplayName().getFormattedText();
+            player.name = event.getPlayer().getDisplayName().getString();
             manager.savePlayer(player.id);
             GroupManager.get_instance().updateName((ServerPlayerEntity) event.getPlayer());
         }
