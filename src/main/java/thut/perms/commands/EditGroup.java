@@ -128,6 +128,10 @@ public class EditGroup
                 if (name == null) name = profile.getId().toString();
                 if (g.members.add(profile.getId()))
                 {
+                    // This removes the group id mapping from other group, and
+                    // updates the UUID mappings for lookups
+                    Perms.addToGroup(profile.getId(), groupName);
+
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.added", true, name, groupName);
                     final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile
@@ -159,6 +163,7 @@ public class EditGroup
                 if (name == null) name = profile.getId().toString();
                 if (g.members.remove(profile.getId()))
                 {
+                    GroupManager.get_instance()._groupIDMap.remove(profile.getId());
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.removed", true, name, groupName);
                     final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile

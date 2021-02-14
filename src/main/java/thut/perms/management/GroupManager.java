@@ -10,7 +10,9 @@ import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import thut.perms.Perms;
 import thut.perms.management.names.Prefix;
 import thut.perms.management.names.Suffix;
@@ -65,6 +67,12 @@ public class GroupManager
         if (!g.prefix.isEmpty()) player.getPrefixes().add(new Prefix(g.prefix));
         if (!g.suffix.isEmpty()) player.getSuffixes().add(new Suffix(g.suffix));
         if (!p.suffix.isEmpty()) player.getSuffixes().add(new Suffix(p.suffix));
+
+        player.refreshDisplayName();
+
+        final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        server.getPlayerList().sendPacketToAllPlayers(new SPlayerListItemPacket(
+                SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME, player));
     }
 
     public void init()
