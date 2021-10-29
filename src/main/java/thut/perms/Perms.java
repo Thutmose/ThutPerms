@@ -26,6 +26,7 @@ import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
 import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
@@ -87,7 +88,8 @@ public class Perms
         MinecraftForge.EVENT_BUS.addListener(Perms.manager::onRegisterCommands);
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-                () -> new IExtensionPoint.DisplayTest(() -> "thutperms", (incoming, isNetwork) -> true));
+                () -> new IExtensionPoint.DisplayTest(() -> FMLNetworkConstants.IGNORESERVERONLY, (ver,
+                        remote) -> true));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
