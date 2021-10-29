@@ -17,9 +17,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import thut.perms.config.Config.ConfigData;
 import thut.perms.config.Configure;
@@ -59,18 +59,18 @@ public class Config extends ConfigData
 
     private final Map<String, List<String>> command_alternates_map = Maps.newHashMap();
 
-    public void sendFeedback(final CommandSource target, final String key, final boolean log, final Object... args)
+    public void sendFeedback(final CommandSourceStack target, final String key, final boolean log, final Object... args)
     {
-        if (this.lang_overrides_map.containsKey(key)) target.sendFeedback(new StringTextComponent(String.format(
+        if (this.lang_overrides_map.containsKey(key)) target.sendSuccess(new TextComponent(String.format(
                 this.lang_overrides_map.get(key), args)), log);
-        else target.sendFeedback(new TranslationTextComponent(key, args), log);
+        else target.sendSuccess(new TranslatableComponent(key, args), log);
     }
 
-    public void sendError(final CommandSource target, final String key, final Object... args)
+    public void sendError(final CommandSourceStack target, final String key, final Object... args)
     {
-        if (this.lang_overrides_map.containsKey(key)) target.sendErrorMessage(new StringTextComponent(String.format(
+        if (this.lang_overrides_map.containsKey(key)) target.sendFailure(new TextComponent(String.format(
                 this.lang_overrides_map.get(key), args)));
-        else target.sendErrorMessage(new TranslationTextComponent(key, args));
+        else target.sendFailure(new TranslatableComponent(key, args));
     }
 
     @Override

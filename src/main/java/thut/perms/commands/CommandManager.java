@@ -2,19 +2,19 @@ package thut.perms.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 
 public class CommandManager
 {
 
-    public static boolean hasPerm(final CommandSource source, final String permission)
+    public static boolean hasPerm(final CommandSourceStack source, final String permission)
     {
         try
         {
-            final ServerPlayerEntity player = source.asPlayer();
+            final ServerPlayer player = source.getPlayerOrException();
             return CommandManager.hasPerm(player, permission);
         }
         catch (final CommandSyntaxException e)
@@ -24,7 +24,7 @@ public class CommandManager
         }
     }
 
-    public static boolean hasPerm(final ServerPlayerEntity player, final String permission)
+    public static boolean hasPerm(final ServerPlayer player, final String permission)
     { /*
        * Check if the node is registered, if not, register it as OP, and send
        * error message about this.

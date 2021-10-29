@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 
 public class Player extends PermissionsHolder
@@ -60,7 +60,7 @@ public class Player extends PermissionsHolder
     @Override
     public void onUpdated(final MinecraftServer server)
     {
-        final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(this.id);
-        if (player != null) server.getCommandManager().send(player);
+        final ServerPlayer player = server.getPlayerList().getPlayer(this.id);
+        if (player != null) server.getCommands().sendCommands(player);
     }
 }

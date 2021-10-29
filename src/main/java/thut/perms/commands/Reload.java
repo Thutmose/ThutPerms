@@ -4,9 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
@@ -16,7 +16,7 @@ import thut.perms.management.GroupManager;
 public class Reload
 {
 
-    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    public static void register(final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
         final String name = "reload_perms";
         String perm;
@@ -24,7 +24,7 @@ public class Reload
                 "Can the player reload the permissions from files.");
 
         // Setup with name and permission
-        LiteralArgumentBuilder<CommandSource> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
                 perm));
         // No target argument version
         command = command.executes(ctx -> Reload.execute(ctx.getSource()));
@@ -33,7 +33,7 @@ public class Reload
         commandDispatcher.register(command);
     }
 
-    private static int execute(final CommandSource source) throws CommandSyntaxException
+    private static int execute(final CommandSourceStack source) throws CommandSyntaxException
     {
         Perms.config.sendFeedback(source, "thutperms.reloaded", true);
         final MinecraftServer server = source.getServer();
@@ -41,12 +41,12 @@ public class Reload
         GroupManager.get_instance()._server = server;
 
         // Refresh things for the players
-        for (final ServerPlayerEntity player : server.getPlayerList().getPlayers())
+        for (final ServerPlayer player : server.getPlayerList().getPlayers())
         {
             // Reload player names, to apply the tags if they exist
             GroupManager.get_instance().updateName(player);
             // Update their command lists
-            server.getCommandManager().send(player);
+            server.getCommands().sendCommands(player);
         }
         return 0;
     }

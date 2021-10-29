@@ -19,15 +19,15 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraftforge.fmllegacy.LogicalSidedProvider;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.context.IContext;
@@ -43,7 +43,7 @@ public class PermissionsManager implements IPermissionHandler
 {
     public static final GameProfile                              testProfile          = new GameProfile(new UUID(
             1234567987, 123545787), "_permtest_");
-    public static ServerPlayerEntity                             testPlayer;
+    public static ServerPlayer                                   testPlayer;
     public boolean                                               SPDiabled            = false;
     private static final HashMap<String, DefaultPermissionLevel> PERMISSION_LEVEL_MAP = new HashMap<>();
     private static final HashMap<String, String>                 DESCRIPTION_MAP      = new HashMap<>();
@@ -96,7 +96,7 @@ public class PermissionsManager implements IPermissionHandler
         this.checkedPerm = true;
         this.lastPerm = node;
         final MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-        if (this.SPDiabled && server.isSinglePlayer()) return true;
+        if (this.SPDiabled && server.isSingleplayer()) return true;
         if (GroupManager.get_instance() == null)
         {
             Perms.LOGGER.warn(node + " is being checked before load!");
@@ -136,19 +136,20 @@ public class PermissionsManager implements IPermissionHandler
 
     public void wrapCommands(final MinecraftServer server)
     {
-        this.wrapCommands(server, server.getCommandManager().getDispatcher());
+        this.wrapCommands(server, server.getCommands().getDispatcher());
     }
 
-    private void wrap_children(final CommandNode<CommandSource> node, final String lastNode,
+    private void wrap_children(final CommandNode<CommandSourceStack> node, final String lastNode,
             final DefaultPermissionLevel prevLevel)
     {
         this.checkedPerm = false;
-        if (node.getRequirement() != null) node.getRequirement().test(PermissionsManager.testPlayer.getCommandSource());
+        if (node.getRequirement() != null) node.getRequirement().test(PermissionsManager.testPlayer
+                .createCommandSourceStack());
         final String perm = lastNode + "." + node.getName();
         if (!this.checkedPerm)
         {
             this.registerNode(perm, prevLevel, "auto generated perm for argument " + node.getName());
-            final Predicate<CommandSource> req = (cs) ->
+            final Predicate<CommandSourceStack> req = (cs) ->
             {
                 return CommandManager.hasPerm(cs, perm);
             };
@@ -160,21 +161,21 @@ public class PermissionsManager implements IPermissionHandler
             {
             }
         }
-        for (final CommandNode<CommandSource> child : node.getChildren())
+        for (final CommandNode<CommandSourceStack> child : node.getChildren())
             this.wrap_children(child, perm, prevLevel);
     }
 
     private final Map<String, String> renames = Maps.newHashMap();
 
-    private void wrap(final CommandNode<CommandSource> node, final CommandNode<CommandSource> parent,
-            final CommandSource source)
+    private void wrap(final CommandNode<CommandSourceStack> node, final CommandNode<CommandSourceStack> parent,
+            final CommandSourceStack source)
     {
         if (parent instanceof RootCommandNode<?>)
         {
             this.lastPerm = "command.";
             this.checkedPerm = false;
             boolean all = node.getRequirement() == null;
-            if (!all) all = node.getRequirement().test(PermissionsManager.testPlayer.getCommandSource());
+            if (!all) all = node.getRequirement().test(PermissionsManager.testPlayer.createCommandSourceStack());
             if (!this.lastPerm.endsWith(".")) this.lastPerm = this.lastPerm + ".";
             final String perm = this.lastPerm + node.getName();
             final DefaultPermissionLevel level = all ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
@@ -199,7 +200,7 @@ public class PermissionsManager implements IPermissionHandler
             if (!this.checkedPerm)
             {
                 this.registerNode(perm, level, "auto generated perm for command /" + node.getName());
-                final Predicate<CommandSource> req = (cs) ->
+                final Predicate<CommandSourceStack> req = (cs) ->
                 {
                     return CommandManager.hasPerm(cs, perm);
                 };
@@ -212,27 +213,28 @@ public class PermissionsManager implements IPermissionHandler
                     Perms.LOGGER.error("Error setting field!", e);
                 }
             }
-            if (Perms.config.argument_perms) for (final CommandNode<CommandSource> child : node.getChildren())
+            if (Perms.config.argument_perms) for (final CommandNode<CommandSourceStack> child : node.getChildren())
                 this.wrap_children(child, perm, level);
             return;
         }
 
-        for (final CommandNode<CommandSource> child : node.getChildren())
+        for (final CommandNode<CommandSourceStack> child : node.getChildren())
             this.wrap(child, node, source);
     }
 
-    private void wrapCommands(final MinecraftServer server, final CommandDispatcher<CommandSource> commandDispatcher)
+    private void wrapCommands(final MinecraftServer server,
+            final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
         // shouldn't be null, but might be if something goes funny connecting to
         // servers.
         if (server == null) return;
-        PermissionsManager.testPlayer = FakePlayerFactory.get(server.getWorld(
-                World.OVERWORLD), PermissionsManager.testProfile);
+        PermissionsManager.testPlayer = FakePlayerFactory.get(server.getLevel(Level.OVERWORLD),
+                PermissionsManager.testProfile);
 
         this.renames.clear();
-        final CommandNode<CommandSource> root = commandDispatcher.getRoot();
+        final CommandNode<CommandSourceStack> root = commandDispatcher.getRoot();
         // First wrap and rename the commands.
-        this.wrap(root, null, server.getCommandSource());
+        this.wrap(root, null, server.createCommandSourceStack());
 
         // Process the renamed commands.
         this.renames.forEach((o, n) ->
@@ -240,14 +242,14 @@ public class PermissionsManager implements IPermissionHandler
             try
             {
                 @SuppressWarnings("unchecked")
-                final Map<String, CommandNode<CommandSource>> children = (Map<String, CommandNode<CommandSource>>) PermissionsManager.CHILDFIELD
+                final Map<String, CommandNode<CommandSourceStack>> children = (Map<String, CommandNode<CommandSourceStack>>) PermissionsManager.CHILDFIELD
                         .get(root);
                 @SuppressWarnings("unchecked")
-                final Map<String, LiteralCommandNode<CommandSource>> literals = (Map<String, LiteralCommandNode<CommandSource>>) PermissionsManager.LITERFIELD
+                final Map<String, LiteralCommandNode<CommandSourceStack>> literals = (Map<String, LiteralCommandNode<CommandSourceStack>>) PermissionsManager.LITERFIELD
                         .get(root);
-                final CommandNode<CommandSource> child = children.remove(o);
+                final CommandNode<CommandSourceStack> child = children.remove(o);
                 if (child != null) children.put(n, child);
-                final LiteralCommandNode<CommandSource> literal = literals.remove(o);
+                final LiteralCommandNode<CommandSourceStack> literal = literals.remove(o);
                 if (literal != null) literals.put(n, literal);
             }
             catch (final Exception e)
@@ -256,15 +258,15 @@ public class PermissionsManager implements IPermissionHandler
             }
         });
 
-        final Map<CommandNode<CommandSource>, java.util.List<LiteralArgumentBuilder<CommandSource>>> newNodes = Maps
+        final Map<CommandNode<CommandSourceStack>, java.util.List<LiteralArgumentBuilder<CommandSourceStack>>> newNodes = Maps
                 .newHashMap();
 
         // Then assign alternates.
-        for (final CommandNode<CommandSource> node : root.getChildren())
+        for (final CommandNode<CommandSourceStack> node : root.getChildren())
             if (node instanceof LiteralCommandNode<?>)
             {
                 final LiteralCommandNode<?> literal = (LiteralCommandNode<?>) node;
-                final java.util.List<LiteralArgumentBuilder<CommandSource>> builders = Lists.newArrayList();
+                final java.util.List<LiteralArgumentBuilder<CommandSourceStack>> builders = Lists.newArrayList();
                 for (final String s : Perms.config.getAlternates(literal.getLiteral()))
                 {
                     if (Perms.config.debug) Perms.LOGGER.info("Generating Alternate {} for {}", s, literal
@@ -275,7 +277,7 @@ public class PermissionsManager implements IPermissionHandler
             }
         newNodes.forEach((node, list) ->
         {
-            for (final LiteralArgumentBuilder<CommandSource> builder : list)
+            for (final LiteralArgumentBuilder<CommandSourceStack> builder : list)
                 commandDispatcher.register(builder);
         });
     }

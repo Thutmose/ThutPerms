@@ -4,8 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
@@ -14,7 +14,7 @@ import thut.perms.management.Group;
 public class AddGroup
 {
 
-    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    public static void register(final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
         final String name = "add_group";
         String perm;
@@ -22,7 +22,7 @@ public class AddGroup
                 "Can the player create a permissions group.");
 
         // Setup with name and permission
-        LiteralArgumentBuilder<CommandSource> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
                 perm));
 
         // Set up the command's arguments
@@ -33,7 +33,7 @@ public class AddGroup
         commandDispatcher.register(command);
     }
 
-    private static int execute(final CommandSource source, final String groupName)
+    private static int execute(final CommandSourceStack source, final String groupName)
     {
         Group g = Perms.getGroup(groupName);
         if (g != null)

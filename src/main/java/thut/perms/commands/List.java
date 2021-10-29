@@ -6,8 +6,8 @@ import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
@@ -15,7 +15,7 @@ import thut.perms.Perms;
 public class List
 {
 
-    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    public static void register(final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
         final String name = "list_perms";
         String perm;
@@ -23,7 +23,7 @@ public class List
                 "Can the player print the list of perms to log.");
 
         // Setup with name and permission
-        LiteralArgumentBuilder<CommandSource> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(name).requires(cs -> CommandManager.hasPerm(cs,
                 perm));
 
         // Set up the command's arguments
@@ -33,7 +33,7 @@ public class List
         commandDispatcher.register(command);
     }
 
-    private static int execute(final CommandSource source)
+    private static int execute(final CommandSourceStack source)
     {
         final java.util.List<String> perms = Lists.newArrayList(Perms.manager.getRegisteredNodes());
         Collections.sort(perms);

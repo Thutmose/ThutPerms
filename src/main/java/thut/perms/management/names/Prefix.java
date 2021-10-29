@@ -1,8 +1,8 @@
 package thut.perms.management.names;
 
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
 
-public class Prefix extends StringTextComponent
+public class Prefix extends TextComponent
 {
 
     public Prefix(final String name)

@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.appender.FileAppender;
@@ -17,20 +16,19 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
+import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.management.Group;
@@ -88,8 +86,8 @@ public class Perms
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(Perms.manager::onRegisterCommands);
 
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(
-                () -> FMLNetworkConstants.IGNORESERVERONLY, (in, net) -> true));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
+                () -> new IExtensionPoint.DisplayTest(() -> "thutperms", (incoming, isNetwork) -> true));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -126,12 +124,12 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayerEntity)
+        if (event.getPlayer() instanceof ServerPlayer)
         {
-            final Player player = manager.createPlayer(event.getPlayer().getUniqueID());
+            final Player player = manager.createPlayer(event.getPlayer().getUUID());
             player.name = event.getPlayer().getDisplayName().getString();
             manager.savePlayer(player.id);
-            GroupManager.get_instance().updateName((ServerPlayerEntity) event.getPlayer());
+            GroupManager.get_instance().updateName((ServerPlayer) event.getPlayer());
         }
     }
 
@@ -140,7 +138,7 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayerEntity) manager.unloadPlayer(event.getPlayer().getUniqueID());
+        if (event.getPlayer() instanceof ServerPlayer) manager.unloadPlayer(event.getPlayer().getUUID());
     }
 
     public static void loadPerms()

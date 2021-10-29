@@ -5,82 +5,51 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
 
 version = "${version_minecraft}-${version_compile}"
 group = '' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${compile_name}"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'snapshot', version: "${version_mappings}"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    
+    mappings channel: "${channel_mappings}", version: "${version_mappings}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
     runs {
-        client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+        client = {
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            properties '-XX': '+UnlockCommercialFeatures'
+            properties '-XX': '+FlightRecorder'
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            arg "-mixin.config=thutessentials.mixins.json"
+            source sourceSets.main
         }
-
-        server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+        server = {
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            properties '-XX': '+UnlockCommercialFeatures'
+            properties '-XX': '+FlightRecorder'
+            workingDirectory project.file('run').canonicalPath
+            arg "-mixin.config=thutessentials.mixins.json"
+            source sourceSets.main
         }
-
-        data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
+        data = {
+            workingDirectory project.file('run').canonicalPath
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+            args '--mod', 'restrictions', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
+            source sourceSets.main
         }
     }
 }
@@ -97,9 +66,6 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${version_minecraft}-${version_forge}"
-    
-    //Use our guys in libs
-    compile fileTree(dir: 'libs', include: '*.jar')
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

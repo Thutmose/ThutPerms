@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 
 public class Group extends PermissionsHolder
@@ -22,8 +22,8 @@ public class Group extends PermissionsHolder
     {
         for (final UUID id : this.members)
         {
-            final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(id);
-            if (player != null) server.getCommandManager().send(player);
+            final ServerPlayer player = server.getPlayerList().getPlayer(id);
+            if (player != null) server.getCommands().sendCommands(player);
         }
     }
 }

@@ -12,10 +12,10 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
@@ -24,7 +24,7 @@ import thut.perms.management.GroupManager;
 
 public class EditGroup
 {
-    public static SuggestionProvider<CommandSource> groupSuggest()
+    public static SuggestionProvider<CommandSourceStack> groupSuggest()
     {
         return (ctx, sb) ->
         {
@@ -34,18 +34,18 @@ public class EditGroup
             names.add(GroupManager.get_instance().initial.name);
             names.add(GroupManager.get_instance().mods.name);
             Collections.sort(names);
-            return net.minecraft.command.ISuggestionProvider.suggest(names, sb);
+            return net.minecraft.commands.SharedSuggestionProvider.suggest(names, sb);
         };
     }
 
-    public static SuggestionProvider<CommandSource> permsSuggest()
+    public static SuggestionProvider<CommandSourceStack> permsSuggest()
     {
         return (ctx, sb) ->
         {
             final java.util.List<String> names = Lists.newArrayList(PermissionAPI.getPermissionHandler()
                     .getRegisteredNodes());
             Collections.sort(names);
-            return net.minecraft.command.ISuggestionProvider.suggest(names, sb);
+            return net.minecraft.commands.SharedSuggestionProvider.suggest(names, sb);
         };
     }
 
@@ -63,17 +63,17 @@ public class EditGroup
         return false;
     }
 
-    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    public static void register(final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
         final String name = "edit_group";
         String perm;
         PermissionAPI.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
                 "Can the player edit a permissions group.");
 
-        final SuggestionProvider<CommandSource> GROUPS = EditGroup.groupSuggest();
+        final SuggestionProvider<CommandSourceStack> GROUPS = EditGroup.groupSuggest();
 
         // Setup with name and permission @formatter:off
-        final LiteralArgumentBuilder<CommandSource> command = Commands.literal(name)
+        final LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(name)
                 .requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("group",
                         StringArgumentType.string()).suggests(GROUPS)
                 .then(EditGroup.add(commandDispatcher))
@@ -86,33 +86,33 @@ public class EditGroup
         commandDispatcher.register(command);
     }
 
-    private static ArgumentBuilder<CommandSource, ?> add(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> add(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_group.add", DefaultPermissionLevel.OP,
                 "Can the player add players to a group.");
 
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeAddGroup(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeAddGroup(ctx.getSource(), StringArgumentType
                 .getString(ctx, "group"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("add").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("player",
                 GameProfileArgument.gameProfile()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> remove(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> remove(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_group.remove", DefaultPermissionLevel.OP,
                 "Can the player remove players from a group.");
 
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeRemoveGroup(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeRemoveGroup(ctx.getSource(), StringArgumentType
                 .getString(ctx, "group"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("remove").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "player", GameProfileArgument.gameProfile()).executes(cmd));
     }
 
-    private static int executeAddGroup(final CommandSource source, final String groupName,
+    private static int executeAddGroup(final CommandSourceStack source, final String groupName,
             final Collection<GameProfile> players)
     {
         final Group g = Perms.getGroup(groupName);
@@ -134,9 +134,9 @@ public class EditGroup
 
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.added", true, name, groupName);
-                    final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile
+                    final ServerPlayer player = source.getServer().getPlayerList().getPlayer(profile
                             .getId());
-                    if (player != null) source.getServer().getCommandManager().send(player);
+                    if (player != null) source.getServer().getCommands().sendCommands(player);
                 }
                 else Perms.config.sendFeedback(source, "thutperms.group.already_in", true, name, groupName);
             }
@@ -147,7 +147,7 @@ public class EditGroup
         return 0;
     }
 
-    private static int executeRemoveGroup(final CommandSource source, final String groupName,
+    private static int executeRemoveGroup(final CommandSourceStack source, final String groupName,
             final Collection<GameProfile> players)
     {
         final Group g = Perms.getGroup(groupName);
@@ -166,9 +166,9 @@ public class EditGroup
                     GroupManager.get_instance()._groupIDMap.remove(profile.getId());
                     Perms.savePerms();
                     Perms.config.sendFeedback(source, "thutperms.group.removed", true, name, groupName);
-                    final ServerPlayerEntity player = source.getServer().getPlayerList().getPlayerByUUID(profile
+                    final ServerPlayer player = source.getServer().getPlayerList().getPlayer(profile
                             .getId());
-                    if (player != null) source.getServer().getCommandManager().send(player);
+                    if (player != null) source.getServer().getCommands().sendCommands(player);
                 }
                 else Perms.config.sendFeedback(source, "thutperms.group.not_in", true, name, groupName);
             }
@@ -179,7 +179,7 @@ public class EditGroup
         return 0;
     }
 
-    private static int executeAddPerm(final CommandSource source, final String perm, final String groupName)
+    private static int executeAddPerm(final CommandSourceStack source, final String perm, final String groupName)
     {
         final Group g = Perms.getGroup(groupName);
         if (g == null)
@@ -196,7 +196,7 @@ public class EditGroup
         return 0;
     }
 
-    private static int executeRemovePerm(final CommandSource source, final String perm, final String groupName)
+    private static int executeRemovePerm(final CommandSourceStack source, final String perm, final String groupName)
     {
         final Group g = Perms.getGroup(groupName);
         if (g == null)
@@ -213,7 +213,7 @@ public class EditGroup
         return 0;
     }
 
-    private static int executeDenyPerm(final CommandSource source, final String perm, final String groupName)
+    private static int executeDenyPerm(final CommandSourceStack source, final String perm, final String groupName)
     {
         final Group g = Perms.getGroup(groupName);
         if (g == null)
@@ -230,7 +230,7 @@ public class EditGroup
         return 0;
     }
 
-    private static int executeUnDenyPerm(final CommandSource source, final String perm, final String groupName)
+    private static int executeUnDenyPerm(final CommandSourceStack source, final String perm, final String groupName)
     {
         final Group g = Perms.getGroup(groupName);
         if (g == null)
@@ -247,48 +247,48 @@ public class EditGroup
         return 0;
     }
 
-    private static ArgumentBuilder<CommandSource, ?> add_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> add_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.add", DefaultPermissionLevel.OP,
                 "Can the player add perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeAddPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeAddPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), StringArgumentType.getString(ctx, "group"));
 
         return Commands.literal("add_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> remove_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> remove_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.remove", DefaultPermissionLevel.OP,
                 "Can the player remove perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeRemovePerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeRemovePerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), StringArgumentType.getString(ctx, "group"));
 
         return Commands.literal("remove_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> deny_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> deny_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.deny", DefaultPermissionLevel.OP,
                 "Can the player deny perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeDenyPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), StringArgumentType.getString(ctx, "group"));
 
         return Commands.literal("deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> un_deny(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> un_deny(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.un_deny", DefaultPermissionLevel.OP,
                 "Can the player undeny perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditGroup.executeUnDenyPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditGroup.executeUnDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), StringArgumentType.getString(ctx, "group"));
 
         return Commands.literal("un_deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(

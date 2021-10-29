@@ -11,12 +11,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
@@ -25,12 +25,12 @@ import thut.perms.management.Player;
 
 public class EditPlayer
 {
-    final static Map<String, TextFormatting> charCodeMap = Maps.newHashMap();
+    final static Map<String, ChatFormatting> charCodeMap = Maps.newHashMap();
 
-    public static void register(final CommandDispatcher<CommandSource> commandDispatcher)
+    public static void register(final CommandDispatcher<CommandSourceStack> commandDispatcher)
     {
-        if (EditPlayer.charCodeMap.isEmpty()) for (final TextFormatting format : TextFormatting.values())
-            EditPlayer.charCodeMap.put(format.formattingCode + "", format);
+        if (EditPlayer.charCodeMap.isEmpty()) for (final ChatFormatting format : ChatFormatting.values())
+            EditPlayer.charCodeMap.put(format.code + "", format);
 
         final String name = "edit_player";
         String perm;
@@ -38,7 +38,7 @@ public class EditPlayer
                 "Can the player edit a player's suffix or prefix.");
 
         // Setup with name and permission @formatter:off
-        final LiteralArgumentBuilder<CommandSource> command = Commands.literal(name)
+        final LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal(name)
                 .requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument("player",
                         GameProfileArgument.gameProfile())
                 .then(EditPlayer.prefix(commandDispatcher))
@@ -51,81 +51,81 @@ public class EditPlayer
         commandDispatcher.register(command);
     }
 
-    private static ArgumentBuilder<CommandSource, ?> prefix(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> prefix(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.prefix", DefaultPermissionLevel.OP,
                 "Can the player add players to a group.");
 
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executePrefix(ctx.getSource(), EditPlayer.format(
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executePrefix(ctx.getSource(), EditPlayer.format(
                 StringArgumentType.getString(ctx, "words")), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("prefix").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "words", StringArgumentType.greedyString()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> suffix(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> suffix(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.suffix", DefaultPermissionLevel.OP,
                 "Can the player remove players from a group.");
 
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executeSuffix(ctx.getSource(), EditPlayer.format(
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeSuffix(ctx.getSource(), EditPlayer.format(
                 StringArgumentType.getString(ctx, "words")), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("suffix").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "words", StringArgumentType.greedyString()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> add_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> add_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.add", DefaultPermissionLevel.OP,
                 "Can the player add perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executeAddPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeAddPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("add_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> remove_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> remove_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.remove", DefaultPermissionLevel.OP,
                 "Can the player remove perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executeRemovePerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeRemovePerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("remove_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> deny_perm(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> deny_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.deny", DefaultPermissionLevel.OP,
                 "Can the player deny perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executeDenyPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static ArgumentBuilder<CommandSource, ?> un_deny(final CommandDispatcher<CommandSource> dispatcher)
+    private static ArgumentBuilder<CommandSourceStack, ?> un_deny(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
         PermissionAPI.registerNode(perm = "command.edit_player.un_deny", DefaultPermissionLevel.OP,
                 "Can the player undeny perms for another player.");
-        final Command<CommandSource> cmd = ctx -> EditPlayer.executeUnDenyPerm(ctx.getSource(), StringArgumentType
+        final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeUnDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
 
         return Commands.literal("un_deny_perm").requires(cs -> CommandManager.hasPerm(cs, perm)).then(Commands.argument(
                 "perm", StringArgumentType.greedyString()).suggests(EditGroup.permsSuggest()).executes(cmd));
     }
 
-    private static int executePrefix(final CommandSource source, final String prefix,
+    private static int executePrefix(final CommandSourceStack source, final String prefix,
             final Collection<GameProfile> players)
     {
         final MinecraftServer server = source.getServer();
@@ -135,14 +135,14 @@ public class EditPlayer
             p.prefix = prefix;
             if (prefix.trim().isEmpty()) p.prefix = "";
             GroupManager.get_instance()._manager.savePlayer(profile.getId());
-            final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(profile.getId());
+            final ServerPlayer player = server.getPlayerList().getPlayer(profile.getId());
             if (player != null) GroupManager.get_instance().updateName(player);
             Perms.config.sendFeedback(source, "thutperms.prefix.set", true, profile.getName(), prefix);
         }
         return 0;
     }
 
-    private static int executeSuffix(final CommandSource source, final String suffix,
+    private static int executeSuffix(final CommandSourceStack source, final String suffix,
             final Collection<GameProfile> players)
     {
         final MinecraftServer server = source.getServer();
@@ -152,14 +152,14 @@ public class EditPlayer
             p.suffix = suffix;
             if (suffix.trim().isEmpty()) p.suffix = "";
             GroupManager.get_instance()._manager.savePlayer(profile.getId());
-            final ServerPlayerEntity player = server.getPlayerList().getPlayerByUUID(profile.getId());
+            final ServerPlayer player = server.getPlayerList().getPlayer(profile.getId());
             if (player != null) GroupManager.get_instance().updateName(player);
             Perms.config.sendFeedback(source, "thutperms.suffix.set", true, profile.getName(), suffix);
         }
         return 0;
     }
 
-    private static int executeAddPerm(final CommandSource source, final String perm,
+    private static int executeAddPerm(final CommandSourceStack source, final String perm,
             final Collection<GameProfile> players)
     {
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
@@ -173,7 +173,7 @@ public class EditPlayer
         return 0;
     }
 
-    private static int executeRemovePerm(final CommandSource source, final String perm,
+    private static int executeRemovePerm(final CommandSourceStack source, final String perm,
             final Collection<GameProfile> players)
     {
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
@@ -187,7 +187,7 @@ public class EditPlayer
         return 0;
     }
 
-    private static int executeDenyPerm(final CommandSource source, final String perm,
+    private static int executeDenyPerm(final CommandSourceStack source, final String perm,
             final Collection<GameProfile> players)
     {
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
@@ -201,7 +201,7 @@ public class EditPlayer
         return 0;
     }
 
-    private static int executeUnDenyPerm(final CommandSource source, final String perm,
+    private static int executeUnDenyPerm(final CommandSourceStack source, final String perm,
             final Collection<GameProfile> players)
     {
         if (!EditGroup.valid(perm)) Perms.config.sendError(source, "thutperms.perm.unknownperm", perm);
@@ -239,7 +239,7 @@ public class EditPlayer
                     }
                     final String toReplace = input.substring(index, index + 2);
                     final String num = toReplace.replace("&", "");
-                    final TextFormatting format = EditPlayer.charCodeMap.get(num);
+                    final ChatFormatting format = EditPlayer.charCodeMap.get(num);
                     if (format != null) input = input.replaceAll(toReplace, format + "");
                     else index++;
                 }

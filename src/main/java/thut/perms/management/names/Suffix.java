@@ -1,8 +1,8 @@
 package thut.perms.management.names;
 
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
 
-public class Suffix extends StringTextComponent
+public class Suffix extends TextComponent
 {
 
     public Suffix(final String name)

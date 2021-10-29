@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
 import thut.perms.Perms;
 
@@ -66,7 +66,7 @@ public class PlayerManager
         final Group ret = this._manager._groupIDMap.get(id);
         if (ret == null)
         {
-            if (this._server.getPlayerList().getOppedPlayers().getEntry(new GameProfile(id, null)) != null)
+            if (this._server.getPlayerList().getOps().get(new GameProfile(id, null)) != null)
                 return this._manager.mods;
             return this._manager.initial;
         }
@@ -110,9 +110,9 @@ public class PlayerManager
         }
     }
 
-    public void unloadPlayer(final ServerPlayerEntity player_)
+    public void unloadPlayer(final ServerPlayer player_)
     {
-        this.unloadPlayer(player_.getUniqueID());
+        this.unloadPlayer(player_.getUUID());
     }
 
     public void unloadPlayer(final UUID id)
@@ -155,9 +155,9 @@ public class PlayerManager
         return player;
     }
 
-    public void createPlayer(final ServerPlayerEntity player_)
+    public void createPlayer(final ServerPlayer player_)
     {
-        this.createPlayer(player_.getUniqueID());
+        this.createPlayer(player_.getUUID());
     }
 
 }

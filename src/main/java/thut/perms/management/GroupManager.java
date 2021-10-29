@@ -9,10 +9,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SPlayerListItemPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
 import thut.perms.Perms;
 import thut.perms.management.names.Prefix;
 import thut.perms.management.names.Suffix;
@@ -55,10 +55,10 @@ public class GroupManager
         this._manager = new PlayerManager(this);
     }
 
-    public void updateName(final ServerPlayerEntity player)
+    public void updateName(final ServerPlayer player)
     {
-        final Group g = this.getPlayerGroup(player.getUniqueID());
-        final Player p = this._manager.getPlayer(player.getUniqueID());
+        final Group g = this.getPlayerGroup(player.getUUID());
+        final Player p = this._manager.getPlayer(player.getUUID());
 
         player.getPrefixes().removeIf(c -> c instanceof Prefix);
         player.getSuffixes().removeIf(c -> c instanceof Suffix);
@@ -71,8 +71,8 @@ public class GroupManager
         player.refreshDisplayName();
 
         final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        server.getPlayerList().sendPacketToAllPlayers(new SPlayerListItemPacket(
-                SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME, player));
+        server.getPlayerList().broadcastAll(new ClientboundPlayerInfoPacket(
+                ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME, player));
     }
 
     public void init()
@@ -117,8 +117,7 @@ public class GroupManager
         final Group ret = this._groupIDMap.get(id);
         if (ret == null)
         {
-            if (this._server.getPlayerList().getOppedPlayers().getEntry(new GameProfile(id, null)) != null)
-                return this.mods;
+            if (this._server.getPlayerList().getOps().get(new GameProfile(id, null)) != null) return this.mods;
             return this.initial;
         }
         return ret;
