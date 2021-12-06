@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
 public class Group extends PermissionsHolder
 {

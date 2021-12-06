@@ -26,8 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fmllegacy.LogicalSidedProvider;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.context.IContext;
@@ -95,7 +94,7 @@ public class PermissionsManager implements IPermissionHandler
     {
         this.checkedPerm = true;
         this.lastPerm = node;
-        final MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (this.SPDiabled && server.isSingleplayer()) return true;
         if (GroupManager.get_instance() == null)
         {

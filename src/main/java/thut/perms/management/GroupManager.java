@@ -12,7 +12,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import thut.perms.Perms;
 import thut.perms.management.names.Prefix;
 import thut.perms.management.names.Suffix;

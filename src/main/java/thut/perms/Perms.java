@@ -20,16 +20,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
-import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
-import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
-import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
+import net.minecraftforge.network.NetworkConstants;
 import net.minecraftforge.server.permission.IPermissionHandler;
 import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.management.Group;
@@ -88,12 +88,12 @@ public class Perms
         MinecraftForge.EVENT_BUS.addListener(Perms.manager::onRegisterCommands);
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-                () -> new IExtensionPoint.DisplayTest(() -> FMLNetworkConstants.IGNORESERVERONLY, (ver,
+                () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (ver,
                         remote) -> true));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void serverAboutToStart(final FMLServerAboutToStartEvent event)
+    public void serverAboutToStart(final ServerAboutToStartEvent event)
     {
         if (Perms.config.disabled)
         {
@@ -107,7 +107,7 @@ public class Perms
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void serverStarting(final FMLServerStartingEvent event)
+    public void serverStarting(final ServerStartingEvent event)
     {
         if (Perms.config.disabled) return;
         Perms.loadPerms();
@@ -116,7 +116,7 @@ public class Perms
     }
 
     @SubscribeEvent
-    public void serverUnload(final FMLServerStoppingEvent evt)
+    public void serverUnload(final ServerStoppingEvent evt)
     {
         Perms.savePerms();
     }
