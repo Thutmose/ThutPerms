@@ -6,10 +6,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
 import thut.perms.management.Group;
+import thut.perms.management.PermNodes;
+import thut.perms.management.PermNodes.DefaultPermissionLevel;
 
 public class AddGroup
 {
@@ -18,7 +18,7 @@ public class AddGroup
     {
         final String name = "add_group";
         String perm;
-        PermissionAPI.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
                 "Can the player create a permissions group.");
 
         // Setup with name and permission

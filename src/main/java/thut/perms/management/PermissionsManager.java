@@ -2,17 +2,14 @@ package thut.perms.management;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
@@ -21,15 +18,17 @@ import com.mojang.brigadier.tree.RootCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import net.minecraftforge.server.permission.IPermissionHandler;
-import net.minecraftforge.server.permission.context.IContext;
+import net.minecraftforge.server.permission.handler.IPermissionHandler;
+import net.minecraftforge.server.permission.nodes.PermissionDynamicContext;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.minecraftforge.server.permission.nodes.PermissionTypes;
 import thut.perms.Perms;
 import thut.perms.commands.AddGroup;
 import thut.perms.commands.CommandManager;
@@ -37,21 +36,17 @@ import thut.perms.commands.EditGroup;
 import thut.perms.commands.EditPlayer;
 import thut.perms.commands.List;
 import thut.perms.commands.Reload;
+import thut.perms.management.PermNodes.DefaultPermissionLevel;
 
 public class PermissionsManager implements IPermissionHandler
 {
-    public static final GameProfile                              testProfile          = new GameProfile(new UUID(
-            1234567987, 123545787), "_permtest_");
-    public static ServerPlayer                                   testPlayer;
-    public boolean                                               SPDiabled            = false;
-    private static final HashMap<String, DefaultPermissionLevel> PERMISSION_LEVEL_MAP = new HashMap<>();
-    private static final HashMap<String, String>                 DESCRIPTION_MAP      = new HashMap<>();
-    private boolean                                              checkedPerm          = false;
-    private static Field                                         CHILDFIELD           = null;
-    private static Field                                         LITERFIELD           = null;
-    private static Field                                         ARGFIELD             = null;
-    private static Field                                         REQFIELD             = null;
-    private String                                               lastPerm             = "";
+    public boolean SPDiabled = false;
+    private boolean checkedPerm = false;
+    private static Field CHILDFIELD = null;
+    private static Field LITERFIELD = null;
+    private static Field ARGFIELD = null;
+    private static Field REQFIELD = null;
+    private String lastPerm = "";
 
     static
     {
@@ -65,66 +60,24 @@ public class PermissionsManager implements IPermissionHandler
         PermissionsManager.REQFIELD.setAccessible(true);
     }
 
-    public void set(final IPermissionHandler permissionHandler)
+    public static PermissionsManager INSTANCE;
+
+    private static final Map<String, Object> DEFAULTS = Maps.newHashMap();
+
+    private Map<String, PermissionNode<?>> nodeMap = Maps.newHashMap();
+    private Set<PermissionNode<?>> nodes;
+
+    public PermissionsManager(Collection<PermissionNode<?>> permissions)
     {
-        for (final String node : permissionHandler.getRegisteredNodes())
-        {
-            final DefaultPermissionLevel level = permissionHandler.hasPermission(PermissionsManager.testProfile, node,
-                    null) ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
-            this.registerNode(node, level, permissionHandler.getNodeDescription(node));
-            Perms.LOGGER.info("Copied values for node " + node);
-        }
+        permissions.forEach(p -> {
+            nodeMap.put(p.getNodeName(), p);
+            DEFAULTS.put(p.getNodeName(), p.getDefaultResolver().resolve(null, PermNodes.testProfile.getId()));
+        });
+        nodes = ImmutableSet.copyOf(nodeMap.values());
+        INSTANCE = this;
     }
 
-    @Override
-    public void registerNode(final String node, final DefaultPermissionLevel level, final String desc)
-    {
-        PermissionsManager.PERMISSION_LEVEL_MAP.put(node, level);
-        if (!desc.isEmpty()) PermissionsManager.DESCRIPTION_MAP.put(node, desc);
-    }
-
-    @Override
-    public Collection<String> getRegisteredNodes()
-    {
-        return Collections.unmodifiableSet(PermissionsManager.PERMISSION_LEVEL_MAP.keySet());
-    }
-
-    @Override
-    public boolean hasPermission(final GameProfile profile, final String node, @Nullable final IContext context)
-    {
-        this.checkedPerm = true;
-        this.lastPerm = node;
-        final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (this.SPDiabled && server.isSingleplayer()) return true;
-        if (GroupManager.get_instance() == null)
-        {
-            Perms.LOGGER.warn(node + " is being checked before load!");
-            Thread.dumpStack();
-            return this.getDefaultPermissionLevel(node) == DefaultPermissionLevel.ALL;
-        }
-        final boolean value = GroupManager.get_instance().hasPermission(profile.getId(), node);
-        if (Perms.config.debug) Perms.LOGGER.info("permnode: " + node + " " + profile + " " + value);
-        return value;
-    }
-
-    @Override
-    public String getNodeDescription(final String node)
-    {
-        final String desc = PermissionsManager.DESCRIPTION_MAP.get(node);
-        return desc == null ? "" : desc;
-    }
-
-    /**
-     * @return The default permission level of a node. If the permission isn't
-     *         registred, it will return NONE
-     */
-    public DefaultPermissionLevel getDefaultPermissionLevel(final String node)
-    {
-        final DefaultPermissionLevel level = PermissionsManager.PERMISSION_LEVEL_MAP.get(node);
-        return level == null ? DefaultPermissionLevel.NONE : level;
-    }
-
-    public void onRegisterCommands(final RegisterCommandsEvent event)
+    public static void onRegisterCommands(final RegisterCommandsEvent event)
     {
         AddGroup.register(event.getDispatcher());
         EditGroup.register(event.getDispatcher());
@@ -135,30 +88,39 @@ public class PermissionsManager implements IPermissionHandler
 
     public void wrapCommands(final MinecraftServer server)
     {
+        // TODO wrapping now...
         this.wrapCommands(server, server.getCommands().getDispatcher());
+    }
+
+    private void registerNode(String perm, DefaultPermissionLevel level, String description)
+    {
+        PermissionNode<Boolean> node = new PermissionNode<>(Perms.MODID, perm, PermissionTypes.BOOLEAN,
+                (player, playerUUID, context) -> level.matches(playerUUID));
+        node.setInformation(new TextComponent(perm), new TextComponent(description));
+
+        this.nodeMap.put(perm, node);
+        DEFAULTS.put(perm, level);
+        nodes = ImmutableSet.copyOf(nodeMap.values());
     }
 
     private void wrap_children(final CommandNode<CommandSourceStack> node, final String lastNode,
             final DefaultPermissionLevel prevLevel)
     {
         this.checkedPerm = false;
-        if (node.getRequirement() != null) node.getRequirement().test(PermissionsManager.testPlayer
-                .createCommandSourceStack());
+        if (node.getRequirement() != null) node.getRequirement().test(PermNodes.testPlayer.createCommandSourceStack());
         final String perm = lastNode + "." + node.getName();
         if (!this.checkedPerm)
         {
             this.registerNode(perm, prevLevel, "auto generated perm for argument " + node.getName());
-            final Predicate<CommandSourceStack> req = (cs) ->
-            {
-                return CommandManager.hasPerm(cs, perm);
+            final Predicate<CommandSourceStack> req = (cs) -> {
+                return CommandManager.hasPerm(cs, "thutperms." + perm);
             };
             try
             {
                 PermissionsManager.REQFIELD.set(node, req);
             }
             catch (IllegalArgumentException | IllegalAccessException e)
-            {
-            }
+            {}
         }
         for (final CommandNode<CommandSourceStack> child : node.getChildren())
             this.wrap_children(child, perm, prevLevel);
@@ -174,7 +136,7 @@ public class PermissionsManager implements IPermissionHandler
             this.lastPerm = "command.";
             this.checkedPerm = false;
             boolean all = node.getRequirement() == null;
-            if (!all) all = node.getRequirement().test(PermissionsManager.testPlayer.createCommandSourceStack());
+            if (!all) all = node.getRequirement().test(PermNodes.testPlayer.createCommandSourceStack());
             if (!this.lastPerm.endsWith(".")) this.lastPerm = this.lastPerm + ".";
             final String perm = this.lastPerm + node.getName();
             final DefaultPermissionLevel level = all ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
@@ -199,9 +161,8 @@ public class PermissionsManager implements IPermissionHandler
             if (!this.checkedPerm)
             {
                 this.registerNode(perm, level, "auto generated perm for command /" + node.getName());
-                final Predicate<CommandSourceStack> req = (cs) ->
-                {
-                    return CommandManager.hasPerm(cs, perm);
+                final Predicate<CommandSourceStack> req = (cs) -> {
+                    return CommandManager.hasPerm(cs, "thutperms." + perm);
                 };
                 try
                 {
@@ -217,8 +178,7 @@ public class PermissionsManager implements IPermissionHandler
             return;
         }
 
-        for (final CommandNode<CommandSourceStack> child : node.getChildren())
-            this.wrap(child, node, source);
+        for (final CommandNode<CommandSourceStack> child : node.getChildren()) this.wrap(child, node, source);
     }
 
     private void wrapCommands(final MinecraftServer server,
@@ -227,8 +187,7 @@ public class PermissionsManager implements IPermissionHandler
         // shouldn't be null, but might be if something goes funny connecting to
         // servers.
         if (server == null) return;
-        PermissionsManager.testPlayer = FakePlayerFactory.get(server.getLevel(Level.OVERWORLD),
-                PermissionsManager.testProfile);
+        PermNodes.testPlayer = FakePlayerFactory.get(server.getLevel(Level.OVERWORLD), PermNodes.testProfile);
 
         this.renames.clear();
         final CommandNode<CommandSourceStack> root = commandDispatcher.getRoot();
@@ -236,8 +195,7 @@ public class PermissionsManager implements IPermissionHandler
         this.wrap(root, null, server.createCommandSourceStack());
 
         // Process the renamed commands.
-        this.renames.forEach((o, n) ->
-        {
+        this.renames.forEach((o, n) -> {
             try
             {
                 @SuppressWarnings("unchecked")
@@ -261,23 +219,80 @@ public class PermissionsManager implements IPermissionHandler
                 .newHashMap();
 
         // Then assign alternates.
-        for (final CommandNode<CommandSourceStack> node : root.getChildren())
-            if (node instanceof LiteralCommandNode<?>)
-            {
-                final LiteralCommandNode<?> literal = (LiteralCommandNode<?>) node;
-                final java.util.List<LiteralArgumentBuilder<CommandSourceStack>> builders = Lists.newArrayList();
-                for (final String s : Perms.config.getAlternates(literal.getLiteral()))
-                {
-                    if (Perms.config.debug) Perms.LOGGER.info("Generating Alternate {} for {}", s, literal
-                            .getLiteral());
-                    builders.add(Commands.literal(s).requires(node.getRequirement()).redirect(node));
-                }
-                if (!builders.isEmpty()) newNodes.put(node, builders);
-            }
-        newNodes.forEach((node, list) ->
+        for (final CommandNode<CommandSourceStack> node : root.getChildren()) if (node instanceof LiteralCommandNode<?>)
         {
-            for (final LiteralArgumentBuilder<CommandSourceStack> builder : list)
-                commandDispatcher.register(builder);
+            final LiteralCommandNode<?> literal = (LiteralCommandNode<?>) node;
+            final java.util.List<LiteralArgumentBuilder<CommandSourceStack>> builders = Lists.newArrayList();
+            for (final String s : Perms.config.getAlternates(literal.getLiteral()))
+            {
+                if (Perms.config.debug) Perms.LOGGER.info("Generating Alternate {} for {}", s, literal.getLiteral());
+                builders.add(Commands.literal(s).requires(node.getRequirement()).redirect(node));
+            }
+            if (!builders.isEmpty()) newNodes.put(node, builders);
+        }
+        newNodes.forEach((node, list) -> {
+            for (final LiteralArgumentBuilder<CommandSourceStack> builder : list) commandDispatcher.register(builder);
         });
+    }
+
+    public static final ResourceLocation ID = new ResourceLocation("thutperms:manager");
+
+    @Override
+    public ResourceLocation getIdentifier()
+    {
+        return ID;
+    }
+
+    @Override
+    public Set<PermissionNode<?>> getRegisteredNodes()
+    {
+        return nodes;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context)
+    {
+        if (node.getType() == PermissionTypes.BOOLEAN)
+        {
+            final T value = (T) GroupManager.get_instance().hasPermission(player.getUUID(),
+                    (PermissionNode<Boolean>) node);
+            if (Perms.config.debug)
+                Perms.LOGGER.info("permnode: " + node + " " + player.getGameProfile() + " " + value);
+            return value;
+        }
+        else if (node.getType() == PermissionTypes.INTEGER)
+        {
+            T perm = (T) GroupManager.get_instance().getIntPerm(player.getUUID(), (PermissionNode<Integer>) node);
+            if (perm != null) return perm;
+        }
+        return node.getDefaultResolver().resolve(player, player.getUUID(), context);
+    }
+
+    @Override
+    public <T> T getOfflinePermission(UUID player, PermissionNode<T> node, PermissionDynamicContext<?>... context)
+    {
+        if (node.getType() == PermissionTypes.BOOLEAN)
+        {
+            @SuppressWarnings("unchecked")
+            final T value = (T) GroupManager.get_instance().hasPermission(player, (PermissionNode<Boolean>) node);
+            if (Perms.config.debug) Perms.LOGGER.info("permnode: " + node + " " + player + " " + value);
+            return value;
+        }
+        return node.getDefaultResolver().resolve(null, player, context);
+    }
+
+    public static <T> DefaultPermissionLevel getDefaultPermissionLevel(PermissionNode<T> permission)
+    {
+        @SuppressWarnings("unchecked")
+        T thing = (T) DEFAULTS.get(permission.getNodeName());
+        if (thing == null)
+        {
+            DEFAULTS.put(permission.getNodeName(),
+                    thing = permission.getDefaultResolver().resolve(null, PermNodes.testProfile.getId()));
+        }
+        if (permission.getType() == PermissionTypes.BOOLEAN)
+            return (boolean) thing ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
+        return DefaultPermissionLevel.OP;
     }
 }

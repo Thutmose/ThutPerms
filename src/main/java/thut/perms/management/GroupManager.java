@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
 import thut.perms.Perms;
 import thut.perms.management.names.Prefix;
 import thut.perms.management.names.Suffix;
@@ -24,14 +25,14 @@ public class GroupManager
     /** Map of dimension id to group manager. */
     public static Map<Integer, GroupManager> _instanceMap = Maps.newHashMap();
 
-    public Map<UUID, Group>   _groupIDMap   = Maps.newHashMap();
+    public Map<UUID, Group> _groupIDMap = Maps.newHashMap();
     public Map<String, Group> _groupNameMap = Maps.newHashMap();
-    public HashSet<Group>     groups        = Sets.newHashSet();
+    public HashSet<Group> groups = Sets.newHashSet();
 
     public Group initial = new Group("default");
-    public Group mods    = new Group("mods");
+    public Group mods = new Group("mods");
 
-    public PlayerManager   _manager = null;
+    public PlayerManager _manager = null;
     public MinecraftServer _server;
 
     /** @return the _instance */
@@ -41,8 +42,7 @@ public class GroupManager
     }
 
     /**
-     * @param _instance
-     *            the _instance to set
+     * @param _instance the _instance to set
      */
     public static void set_instance(final GroupManager _instance)
     {
@@ -71,15 +71,19 @@ public class GroupManager
         player.refreshDisplayName();
 
         final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        server.getPlayerList().broadcastAll(new ClientboundPlayerInfoPacket(
-                ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME, player));
+        server.getPlayerList().broadcastAll(
+                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME, player));
     }
 
     public void init()
     {
         if (this.initial == null) this.initial = new Group("default");
         this._groupNameMap.put(this.initial.name, this.initial);
-        if (this.mods == null) this.mods = new Group("mods");
+        if (this.mods == null)
+        {
+            this.mods = new Group("mods");
+            this.mods.setAll(true);
+        }
         this._groupNameMap.put(this.mods.name, this.mods);
         for (final Group g : this.groups)
         {
@@ -96,20 +100,17 @@ public class GroupManager
         // Refeshes players in groups to ensure that there is only 1 group with
         // each player, this cleans up some issues with badly formatted
         // permissions files
-        for (final UUID id : this._groupIDMap.keySet())
-            Perms.addToGroup(id, this._groupIDMap.get(id).name);
+        for (final UUID id : this._groupIDMap.keySet()) Perms.addToGroup(id, this._groupIDMap.get(id).name);
 
-        this.mods.setAll(true);
         this._groupNameMap.put(this.initial.name, this.initial);
         this._groupNameMap.put(this.mods.name, this.mods);
 
         // Set up parents.
-        for (final Group g : this.groups)
-            if (g.parentName != null)
-            {
-                g._parent = this._groupNameMap.get(g.parentName);
-                if (g._parent == null) g.parentName = null;
-            }
+        for (final Group g : this.groups) if (g.parentName != null)
+        {
+            g._parent = this._groupNameMap.get(g.parentName);
+            if (g._parent == null) g.parentName = null;
+        }
     }
 
     public Group getPlayerGroup(final UUID id)
@@ -123,7 +124,7 @@ public class GroupManager
         return ret;
     }
 
-    public boolean hasPermission(final UUID id, final String perm)
+    public Boolean hasPermission(final UUID id, final PermissionNode<Boolean> perm)
     {
         final Group g = this.getPlayerGroup(id);
         final Player player = this._manager.getPlayer(id);
@@ -133,6 +134,19 @@ public class GroupManager
         if (player != null && player.isDenied(perm)) return false;
 
         return g.hasPermission(perm) || canPlayerUse;
+    }
+
+    public Integer getIntPerm(final UUID id, final PermissionNode<Integer> perm)
+    {
+        final Group g = this.getPlayerGroup(id);
+        final Player player = this._manager.getPlayer(id);
+        Integer gInt = g.getNumberPerm(perm);
+        Integer pInt = player.getNumberPerm(perm);
+
+        if (gInt == null) return pInt;
+        if (pInt == null) return gInt;
+
+        return Math.max(pInt, gInt);
     }
 
 }

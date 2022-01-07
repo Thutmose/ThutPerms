@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
 
 public class Player extends PermissionsHolder
 {
@@ -36,7 +37,7 @@ public class Player extends PermissionsHolder
     }
 
     @Override
-    public boolean isAllowed(final String permission)
+    public boolean isAllowed(final PermissionNode<Boolean> permission)
     {
         for (final Group group : this._groups)
             if (group.isAllowed(permission)) return true;
@@ -44,7 +45,7 @@ public class Player extends PermissionsHolder
     }
 
     @Override
-    public boolean isDenied(final String permission)
+    public boolean isDenied(final PermissionNode<Boolean> permission)
     {
         for (final Group group : this._groups)
             if (group.isDenied(permission)) return true;

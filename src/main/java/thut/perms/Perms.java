@@ -16,11 +16,12 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -30,8 +31,8 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkConstants;
-import net.minecraftforge.server.permission.IPermissionHandler;
-import net.minecraftforge.server.permission.PermissionAPI;
+import net.minecraftforge.server.permission.events.PermissionGatherEvent;
+import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 import thut.perms.management.Group;
 import thut.perms.management.GroupManager;
 import thut.perms.management.PermissionsManager;
@@ -41,11 +42,11 @@ import thut.perms.management.PlayerManager;
 @Mod(Perms.MODID)
 public class Perms
 {
-    public static final String MODID           = "thutperms";
-    public static final Config config          = new Config();
-    public static final Logger LOGGER          = LogManager.getLogger(Perms.MODID);
-    public static File         jsonFile_groups = null;
-    public static File         folder_players  = null;
+    public static final String MODID = "thutperms";
+    public static final Config config = new Config();
+    public static final Logger LOGGER = LogManager.getLogger(Perms.MODID);
+    public static File jsonFile_groups = null;
+    public static File folder_players = null;
 
     public static ExclusionStrategy exclusion = new ExclusionStrategy()
     {
@@ -64,9 +65,6 @@ public class Perms
         }
     };
 
-    public static final PermissionsManager manager    = new PermissionsManager();
-    private IPermissionHandler             oldHandler = null;
-
     public Perms()
     {
         final Path dir = FMLPaths.CONFIGDIR.get().resolve(Perms.MODID);
@@ -77,32 +75,30 @@ public class Perms
         final File logfile = FMLPaths.GAMEDIR.get().resolve("logs").resolve(Perms.MODID + ".log").toFile();
         if (logfile.exists()) logfile.delete();
         final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) Perms.LOGGER;
-        final FileAppender appender = FileAppender.newBuilder().withFileName(logfile.getAbsolutePath()).setName(
-                Perms.MODID).build();
+        final FileAppender appender = FileAppender.newBuilder().withFileName(logfile.getAbsolutePath())
+                .setName(Perms.MODID).build();
         logger.addAppender(appender);
         appender.start();
 
         thut.perms.config.Config.setupConfigs(Perms.config, Perms.MODID, Perms.MODID);
 
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.addListener(Perms.manager::onRegisterCommands);
+        MinecraftForge.EVENT_BUS.addListener(PermissionsManager::onRegisterCommands);
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-                () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (ver,
-                        remote) -> true));
+                () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (ver, remote) -> true));
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void serverAboutToStart(final ServerAboutToStartEvent event)
+    public void serverAboutToStart(final PermissionGatherEvent.Handler event)
     {
-        if (Perms.config.disabled)
+        if (!Perms.config.disabled)
         {
-            if (this.oldHandler != null) PermissionAPI.setPermissionHandler(this.oldHandler);
-        }
-        else if (PermissionAPI.getPermissionHandler() != Perms.manager)
-        {
-            Perms.manager.set(this.oldHandler = PermissionAPI.getPermissionHandler());
-            PermissionAPI.setPermissionHandler(Perms.manager);
+            ResourceLocation selectedPermissionHandler = new ResourceLocation(
+                    ForgeConfig.SERVER.permissionHandler.get());
+            if (selectedPermissionHandler.equals(DefaultPermissionHandler.IDENTIFIER))
+                ForgeConfig.SERVER.permissionHandler.set(PermissionsManager.ID.toString());
+            event.addPermissionHandler(PermissionsManager.ID, PermissionsManager::new);
         }
     }
 
@@ -112,7 +108,7 @@ public class Perms
         if (Perms.config.disabled) return;
         Perms.loadPerms();
         GroupManager.get_instance()._server = event.getServer();
-        Perms.manager.wrapCommands(event.getServer());
+        PermissionsManager.INSTANCE.wrapCommands(event.getServer());
     }
 
     @SubscribeEvent
@@ -208,8 +204,7 @@ public class Perms
         // Remove from all other groups first.
         GroupManager.get_instance().initial.members.remove(id);
         GroupManager.get_instance().mods.members.remove(id);
-        for (final Group old : GroupManager.get_instance().groups)
-            old.members.remove(id);
+        for (final Group old : GroupManager.get_instance().groups) old.members.remove(id);
         if (group != null)
         {
             group.members.add(id);

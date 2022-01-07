@@ -17,10 +17,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import net.minecraftforge.server.permission.PermissionAPI;
 import thut.perms.Perms;
 import thut.perms.management.GroupManager;
+import thut.perms.management.PermNodes;
+import thut.perms.management.PermNodes.DefaultPermissionLevel;
 import thut.perms.management.Player;
 
 public class EditPlayer
@@ -34,7 +34,7 @@ public class EditPlayer
 
         final String name = "edit_player";
         String perm;
-        PermissionAPI.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command." + name, DefaultPermissionLevel.OP,
                 "Can the player edit a player's suffix or prefix.");
 
         // Setup with name and permission @formatter:off
@@ -54,7 +54,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> prefix(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.prefix", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.prefix", DefaultPermissionLevel.OP,
                 "Can the player add players to a group.");
 
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executePrefix(ctx.getSource(), EditPlayer.format(
@@ -67,7 +67,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> suffix(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.suffix", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.suffix", DefaultPermissionLevel.OP,
                 "Can the player remove players from a group.");
 
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeSuffix(ctx.getSource(), EditPlayer.format(
@@ -80,7 +80,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> add_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.add", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.add", DefaultPermissionLevel.OP,
                 "Can the player add perms for another player.");
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeAddPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
@@ -92,7 +92,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> remove_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.remove", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.remove", DefaultPermissionLevel.OP,
                 "Can the player remove perms for another player.");
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeRemovePerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
@@ -104,7 +104,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> deny_perm(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.deny", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.deny", DefaultPermissionLevel.OP,
                 "Can the player deny perms for another player.");
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));
@@ -116,7 +116,7 @@ public class EditPlayer
     private static ArgumentBuilder<CommandSourceStack, ?> un_deny(final CommandDispatcher<CommandSourceStack> dispatcher)
     {
         String perm;
-        PermissionAPI.registerNode(perm = "command.edit_player.un_deny", DefaultPermissionLevel.OP,
+        PermNodes.registerNode(perm = "command.edit_player.un_deny", DefaultPermissionLevel.OP,
                 "Can the player undeny perms for another player.");
         final Command<CommandSourceStack> cmd = ctx -> EditPlayer.executeUnDenyPerm(ctx.getSource(), StringArgumentType
                 .getString(ctx, "perm"), GameProfileArgument.getGameProfiles(ctx, "player"));

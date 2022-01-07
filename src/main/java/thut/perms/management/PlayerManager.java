@@ -16,6 +16,7 @@ import com.mojang.authlib.GameProfile;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
 import thut.perms.Perms;
 
 public class PlayerManager
@@ -73,7 +74,7 @@ public class PlayerManager
         return ret;
     }
 
-    public boolean hasPermission(final UUID id, final String perm)
+    public boolean hasPermission(final UUID id, final PermissionNode<Boolean> perm)
     {
         final Group g = this.getPlayerGroup(id);
         final Player player = this._playerIDMap.get(id);

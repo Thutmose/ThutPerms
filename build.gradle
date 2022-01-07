@@ -32,7 +32,6 @@ minecraft {
             properties '-XX': '+FlightRecorder'
             properties 'forge.logging.console.level': 'debug'
             workingDirectory project.file('run').canonicalPath
-            arg "-mixin.config=thutessentials.mixins.json"
             source sourceSets.main
         }
         server = {
@@ -41,7 +40,6 @@ minecraft {
             properties '-XX': '+UnlockCommercialFeatures'
             properties '-XX': '+FlightRecorder'
             workingDirectory project.file('run').canonicalPath
-            arg "-mixin.config=thutessentials.mixins.json"
             source sourceSets.main
         }
         data = {

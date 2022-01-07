@@ -1,29 +1,37 @@
 package thut.perms.management;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import thut.perms.Perms;
+import net.minecraftforge.server.permission.nodes.PermissionNode;
+import thut.perms.management.PermNodes.DefaultPermissionLevel;
 
 public abstract class PermissionsHolder
 {
-    public String  name       = "";
-    public String  prefix     = "";
-    public String  suffix     = "";
-    public boolean all        = false;
+    public String name = "";
+    public String prefix = "";
+    public String suffix = "";
+    public boolean all = false;
     public boolean all_non_op = true;
-    public String  parentName = null;
+    public String parentName = null;
 
     public List<String> allowedCommands = Lists.newArrayList();
-    public List<String> bannedCommands  = Lists.newArrayList();
+    public List<String> bannedCommands = Lists.newArrayList();
+
+    public Map<String, Integer> permNumbers = Maps.newHashMap();
+
+    public Map<String, String> permStrings = Maps.newHashMap();
 
     public PermissionsHolder _parent;
-    protected List<String>   _whiteWildCards;
-    protected List<String>   _blackWildCards;
-    public boolean           _init = false;
+    protected List<String> _whiteWildCards;
+    protected List<String> _blackWildCards;
+    public boolean _init = false;
 
     private void init()
     {
@@ -54,36 +62,41 @@ public abstract class PermissionsHolder
         return this.bannedCommands;
     }
 
-    public boolean isDenied(final String permission)
+    public boolean isDenied(final PermissionNode<Boolean> permission)
     {
         if (this._parent != null && this._parent.isDenied(permission)) return true;
         if (!this._init || this._blackWildCards == null || this.bannedCommands == null) this.init();
-        for (final String pattern : this._blackWildCards)
-            if (permission.startsWith(pattern)) return true;
-            else if (permission.matches(pattern)) return true;
-        if (this.bannedCommands.contains(permission)) return true;
+        for (final String pattern : this._blackWildCards) if (permission.getNodeName().startsWith(pattern)) return true;
+        else if (permission.getNodeName().matches(pattern)) return true;
+        if (this.bannedCommands.contains(permission.getNodeName())) return true;
         return false;
     }
 
-    public boolean isAllowed(final String permission)
+    public boolean isAllowed(final PermissionNode<Boolean> permission)
     {
         if (this._parent != null && this._parent.isAllowed(permission)) return true;
         if (this.isAll()) return true;
         if (!this._init || this._whiteWildCards == null || this.allowedCommands == null) this.init();
-        if (this.isAll_non_op() && Perms.manager.getDefaultPermissionLevel(permission) == DefaultPermissionLevel.ALL)
+        if (this.isAll_non_op()
+                && PermissionsManager.getDefaultPermissionLevel(permission) == DefaultPermissionLevel.ALL)
             return true;
-        for (final String pattern : this._whiteWildCards)
-            if (permission.startsWith(pattern)) return true;
-            else if (permission.matches(pattern)) return true;
-        return this.allowedCommands.contains(permission);
+        for (final String pattern : this._whiteWildCards) if (permission.getNodeName().startsWith(pattern)) return true;
+        else if (permission.getNodeName().matches(pattern)) return true;
+        return this.allowedCommands.contains(permission.getNodeName());
     }
 
-    public boolean hasPermission(final String permission)
+    public boolean hasPermission(final PermissionNode<Boolean> permission)
     {
         // Check if permission is specifically denied.
         if (this.isDenied(permission)) return false;
         // check if permission is allowed.
         return this.isAllowed(permission);
+    }
+
+    @Nullable
+    public Integer getNumberPerm(final PermissionNode<Integer> permission)
+    {
+        return permNumbers.getOrDefault(permission.getNodeName(), null);
     }
 
     public boolean isAll()
