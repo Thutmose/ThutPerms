@@ -61,7 +61,6 @@ public class PermNodes
 
     private static final Pattern NODENAMEFIXER = Pattern.compile("(\\w+).(.*)");
 
-    @SuppressWarnings("unchecked")
     public static boolean getBooleanPerm(ServerPlayer player, String name)
     {
         PermissionNode<Boolean> node = getBooleanNode(name);
