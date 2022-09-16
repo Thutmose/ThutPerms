@@ -131,7 +131,11 @@ public class EditGroup
                 Perms.savePerms();
                 Perms.config.sendFeedback(source, "thutperms.group.added", true, name, groupName);
                 final ServerPlayer player = source.getServer().getPlayerList().getPlayer(profile.getId());
-                if (player != null) source.getServer().getCommands().sendCommands(player);
+                if (player != null)
+                {
+                    source.getServer().getCommands().sendCommands(player);
+                    GroupManager.get_instance().updateName(player);
+                }
             }
             else Perms.config.sendFeedback(source, "thutperms.group.already_in", true, name, groupName);
         }

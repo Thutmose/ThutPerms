@@ -38,7 +38,6 @@ public class Reload
         Perms.config.sendFeedback(source, "thutperms.reloaded", true);
         final MinecraftServer server = source.getServer();
         Perms.loadPerms();
-        GroupManager.get_instance()._server = server;
 
         // Refresh things for the players
         for (final ServerPlayer player : server.getPlayerList().getPlayers())

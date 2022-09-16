@@ -28,11 +28,11 @@ import thut.perms.management.GroupManager;
 public class Config extends ConfigData
 {
     @Configure(category = "general")
-    public boolean clientEnabled  = true;
+    public boolean clientEnabled = true;
     @Configure(category = "general")
-    public boolean debug          = false;
+    public boolean debug = false;
     @Configure(category = "general")
-    public boolean disabled       = false;
+    public boolean disabled = false;
     @Configure(category = "general")
     public boolean argument_perms = false;
 
@@ -61,22 +61,22 @@ public class Config extends ConfigData
 
     public void sendFeedback(final CommandSourceStack target, final String key, final boolean log, final Object... args)
     {
-        if (this.lang_overrides_map.containsKey(key)) target.sendSuccess(new TextComponent(String.format(
-                this.lang_overrides_map.get(key), args)), log);
+        if (this.lang_overrides_map.containsKey(key))
+            target.sendSuccess(new TextComponent(String.format(this.lang_overrides_map.get(key), args)), log);
         else target.sendSuccess(new TranslatableComponent(key, args), log);
     }
 
     public void sendError(final CommandSourceStack target, final String key, final Object... args)
     {
-        if (this.lang_overrides_map.containsKey(key)) target.sendFailure(new TextComponent(String.format(
-                this.lang_overrides_map.get(key), args)));
+        if (this.lang_overrides_map.containsKey(key))
+            target.sendFailure(new TextComponent(String.format(this.lang_overrides_map.get(key), args)));
         else target.sendFailure(new TranslatableComponent(key, args));
     }
 
     @Override
     public void onUpdated()
     {
-        if (GroupManager.get_instance() != null && GroupManager.get_instance()._server != null) Perms.loadPerms();
+        if (GroupManager.get_instance() != null && Perms.getServer() != null) Perms.loadPerms();
 
         for (final String s : this.command_renames)
         {
@@ -91,17 +91,16 @@ public class Config extends ConfigData
             final BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
             final Gson gson = new GsonBuilder().create();
             final JsonObject o = gson.fromJson(in, JsonObject.class);
-            for (final Entry<String, JsonElement> entry : o.entrySet())
-                try
-                {
-                    final String key = entry.getKey();
-                    final String value = entry.getValue().getAsString();
-                    this.lang_overrides_map.put(key, value);
-                }
-                catch (final Exception e)
-                {
-                    Perms.LOGGER.error("Error with keypair {}, {}", entry.getKey(), entry.getValue());
-                }
+            for (final Entry<String, JsonElement> entry : o.entrySet()) try
+            {
+                final String key = entry.getKey();
+                final String value = entry.getValue().getAsString();
+                this.lang_overrides_map.put(key, value);
+            }
+            catch (final Exception e)
+            {
+                Perms.LOGGER.error("Error with keypair {}, {}", entry.getKey(), entry.getValue());
+            }
         }
         catch (final Exception e)
         {
@@ -110,13 +109,12 @@ public class Config extends ConfigData
         for (final String s : this.command_alternates)
         {
             final String[] args = s.split(":");
-            if (args.length < 2) Perms.LOGGER.warn(
-                    "Invalid command alternates: {}, it must be of form \"<old>:<alternate1>:<alternate2>:etc\"");
+            if (args.length < 2) Perms.LOGGER
+                    .warn("Invalid command alternates: {}, it must be of form \"<old>:<alternate1>:<alternate2>:etc\"");
             else
             {
                 final List<String> alts = Lists.newArrayList();
-                for (int i = 1; i < args.length; i++)
-                    alts.add(args[i]);
+                for (int i = 1; i < args.length; i++) alts.add(args[i]);
                 this.command_alternates_map.put(args[0], alts);
             }
         }

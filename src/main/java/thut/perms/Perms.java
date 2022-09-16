@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,6 +32,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraftforge.server.permission.events.PermissionGatherEvent;
 import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 import thut.perms.management.Group;
@@ -107,7 +109,6 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         Perms.loadPerms();
-        GroupManager.get_instance()._server = event.getServer();
         PermissionsManager.INSTANCE.wrapCommands(event.getServer());
     }
 
@@ -122,12 +123,12 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayer)
+        if (event.getPlayer() instanceof ServerPlayer original)
         {
             final Player player = manager.createPlayer(event.getPlayer().getUUID());
             player.name = event.getPlayer().getDisplayName().getString();
             manager.savePlayer(player.id);
-            GroupManager.get_instance().updateName((ServerPlayer) event.getPlayer());
+            GroupManager.get_instance().updateName(original);
         }
     }
 
@@ -217,5 +218,10 @@ public class Perms
         if (name.equals(GroupManager.get_instance().initial.name)) return GroupManager.get_instance().initial;
         if (name.equals(GroupManager.get_instance().mods.name)) return GroupManager.get_instance().mods;
         return GroupManager.get_instance()._groupNameMap.get(name);
+    }
+
+    public static MinecraftServer getServer()
+    {
+        return ServerLifecycleHooks.getCurrentServer();
     }
 }

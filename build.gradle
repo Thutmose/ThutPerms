@@ -3,16 +3,21 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        flatDir {
+          dirs 'libs'
+        }
+        maven {url='https://repo.spongepowered.org/repository/maven-public/'}
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
-apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+apply plugin: 'org.spongepowered.mixin'
 
 version = "${version_minecraft}-${version_compile}"
 group = '' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -23,7 +28,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 minecraft {
     mappings channel: "${channel_mappings}", version: "${version_mappings}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
+    
     runs {
         client = {
             // recommended logging level for the console
@@ -31,6 +36,8 @@ minecraft {
             properties '-XX': '+UnlockCommercialFeatures'
             properties '-XX': '+FlightRecorder'
             properties 'forge.logging.console.level': 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             workingDirectory project.file('run').canonicalPath
             source sourceSets.main
         }
@@ -39,6 +46,8 @@ minecraft {
             properties 'forge.logging.console.level': 'debug'
             properties '-XX': '+UnlockCommercialFeatures'
             properties '-XX': '+FlightRecorder'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             workingDirectory project.file('run').canonicalPath
             source sourceSets.main
         }
@@ -46,7 +55,7 @@ minecraft {
             workingDirectory project.file('run').canonicalPath
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'restrictions', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
+            args '--mod', '${mod_id}', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
             source sourceSets.main
         }
     }
@@ -54,8 +63,10 @@ minecraft {
 
 repositories {
     maven {
-        name = "CurseForge"
-        url = "https://minecraft.curseforge.com/api/maven/"
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
     flatDir {
         dirs 'libs'
@@ -64,6 +75,8 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${version_minecraft}-${version_forge}"
+    
+    implementation fg.deobf("curse.maven:thutessentials-251135:3921687")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

@@ -33,7 +33,6 @@ public class GroupManager
     public Group mods = new Group("mods");
 
     public PlayerManager _manager = null;
-    public MinecraftServer _server;
 
     /** @return the _instance */
     public static GroupManager get_instance()
@@ -118,7 +117,7 @@ public class GroupManager
         final Group ret = this._groupIDMap.get(id);
         if (ret == null)
         {
-            if (this._server.getPlayerList().getOps().get(new GameProfile(id, null)) != null) return this.mods;
+            if (Perms.getServer().getPlayerList().getOps().get(new GameProfile(id, null)) != null) return this.mods;
             return this.initial;
         }
         return ret;

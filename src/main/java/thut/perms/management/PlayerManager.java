@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.permission.nodes.PermissionNode;
 import thut.perms.Perms;
@@ -22,8 +21,6 @@ import thut.perms.Perms;
 public class PlayerManager
 {
     private final Map<UUID, Player> _playerIDMap = Maps.newHashMap();
-
-    public MinecraftServer _server;
 
     public GroupManager _manager;
 
@@ -67,7 +64,7 @@ public class PlayerManager
         final Group ret = this._manager._groupIDMap.get(id);
         if (ret == null)
         {
-            if (this._server.getPlayerList().getOps().get(new GameProfile(id, null)) != null)
+            if (Perms.getServer().getPlayerList().getOps().get(new GameProfile(id, null)) != null)
                 return this._manager.mods;
             return this._manager.initial;
         }

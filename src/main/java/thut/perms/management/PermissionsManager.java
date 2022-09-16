@@ -112,6 +112,7 @@ public class PermissionsManager implements IPermissionHandler
         if (!this.checkedPerm)
         {
             this.registerNode(perm, prevLevel, "auto generated perm for argument " + node.getName());
+            if (Perms.config.debug) Perms.LOGGER.debug("New perm needed for " + perm);
             final Predicate<CommandSourceStack> req = (cs) -> {
                 return CommandManager.hasPerm(cs, "thutperms." + perm);
             };
@@ -136,7 +137,8 @@ public class PermissionsManager implements IPermissionHandler
             this.lastPerm = "command.";
             this.checkedPerm = false;
             boolean all = node.getRequirement() == null;
-            if (!all) all = node.getRequirement().test(PermNodes.testPlayer.createCommandSourceStack());
+            boolean permed = node.getRequirement().test(PermNodes.testPlayer.createCommandSourceStack());
+            if (!all) all = permed;
             if (!this.lastPerm.endsWith(".")) this.lastPerm = this.lastPerm + ".";
             final String perm = this.lastPerm + node.getName();
             final DefaultPermissionLevel level = all ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
@@ -157,10 +159,10 @@ public class PermissionsManager implements IPermissionHandler
                     Perms.LOGGER.error("Error setting field!", e);
                 }
             }
-
             if (!this.checkedPerm)
             {
                 this.registerNode(perm, level, "auto generated perm for command /" + node.getName());
+                if (Perms.config.debug) Perms.LOGGER.debug("New perm needed for " + perm);
                 final Predicate<CommandSourceStack> req = (cs) -> {
                     return CommandManager.hasPerm(cs, "thutperms." + perm);
                 };
@@ -249,21 +251,25 @@ public class PermissionsManager implements IPermissionHandler
         return nodes;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T getPermission(ServerPlayer player, PermissionNode<T> node, PermissionDynamicContext<?>... context)
     {
+        checkedPerm = true;
         if (node.getType() == PermissionTypes.BOOLEAN)
         {
+            @SuppressWarnings("unchecked")
             final T value = (T) GroupManager.get_instance().hasPermission(player.getUUID(),
                     (PermissionNode<Boolean>) node);
             if (Perms.config.debug)
-                Perms.LOGGER.info("permnode: " + node + " " + player.getGameProfile() + " " + value);
+                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + value);
             return value;
         }
         else if (node.getType() == PermissionTypes.INTEGER)
         {
+            @SuppressWarnings("unchecked")
             T perm = (T) GroupManager.get_instance().getIntPerm(player.getUUID(), (PermissionNode<Integer>) node);
+            if (Perms.config.debug)
+                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + perm);
             if (perm != null) return perm;
         }
         return node.getDefaultResolver().resolve(player, player.getUUID(), context);
@@ -272,12 +278,20 @@ public class PermissionsManager implements IPermissionHandler
     @Override
     public <T> T getOfflinePermission(UUID player, PermissionNode<T> node, PermissionDynamicContext<?>... context)
     {
+        checkedPerm = true;
         if (node.getType() == PermissionTypes.BOOLEAN)
         {
             @SuppressWarnings("unchecked")
             final T value = (T) GroupManager.get_instance().hasPermission(player, (PermissionNode<Boolean>) node);
-            if (Perms.config.debug) Perms.LOGGER.info("permnode: " + node + " " + player + " " + value);
+            if (Perms.config.debug) Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player + " " + value);
             return value;
+        }
+        else if (node.getType() == PermissionTypes.INTEGER)
+        {
+            @SuppressWarnings("unchecked")
+            T perm = (T) GroupManager.get_instance().getIntPerm(player, (PermissionNode<Integer>) node);
+            if (Perms.config.debug) Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player + " " + perm);
+            if (perm != null) return perm;
         }
         return node.getDefaultResolver().resolve(null, player, context);
     }
