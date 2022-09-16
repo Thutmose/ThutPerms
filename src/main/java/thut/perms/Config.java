@@ -18,8 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.fml.loading.FMLPaths;
 import thut.perms.config.Config.ConfigData;
 import thut.perms.config.Configure;
@@ -62,15 +61,15 @@ public class Config extends ConfigData
     public void sendFeedback(final CommandSourceStack target, final String key, final boolean log, final Object... args)
     {
         if (this.lang_overrides_map.containsKey(key))
-            target.sendSuccess(new TextComponent(String.format(this.lang_overrides_map.get(key), args)), log);
-        else target.sendSuccess(new TranslatableComponent(key, args), log);
+            target.sendSuccess(Component.literal(String.format(this.lang_overrides_map.get(key), args)), log);
+        else target.sendSuccess(Component.translatable(key, args), log);
     }
 
     public void sendError(final CommandSourceStack target, final String key, final Object... args)
     {
         if (this.lang_overrides_map.containsKey(key))
-            target.sendFailure(new TextComponent(String.format(this.lang_overrides_map.get(key), args)));
-        else target.sendFailure(new TranslatableComponent(key, args));
+            target.sendFailure(Component.literal(String.format(this.lang_overrides_map.get(key), args)));
+        else target.sendFailure(Component.translatable(key, args));
     }
 
     @Override

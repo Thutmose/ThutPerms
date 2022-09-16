@@ -123,10 +123,10 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayer original)
+        if (event.getEntity() instanceof ServerPlayer original)
         {
-            final Player player = manager.createPlayer(event.getPlayer().getUUID());
-            player.name = event.getPlayer().getDisplayName().getString();
+            final Player player = manager.createPlayer(event.getEntity().getUUID());
+            player.name = event.getEntity().getDisplayName().getString();
             manager.savePlayer(player.id);
             GroupManager.get_instance().updateName(original);
         }
@@ -137,7 +137,7 @@ public class Perms
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
-        if (event.getPlayer() instanceof ServerPlayer) manager.unloadPlayer(event.getPlayer().getUUID());
+        if (event.getEntity() instanceof ServerPlayer) manager.unloadPlayer(event.getEntity().getUUID());
     }
 
     public static void loadPerms()

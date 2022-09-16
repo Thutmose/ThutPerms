@@ -11,7 +11,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,7 +83,7 @@ public class PermNodes
     {
         PermissionNode<Boolean> node = new PermissionNode<>(Perms.MODID, name, PermissionTypes.BOOLEAN,
                 (player, playerUUID, context) -> level.matches(playerUUID));
-        node.setInformation(new TextComponent(node.getNodeName()), new TextComponent(message));
+        node.setInformation(Component.literal(node.getNodeName()), Component.literal(message));
         NODES.put(name, node);
         NODES.put(node.getNodeName(), node);
     }

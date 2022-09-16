@@ -18,7 +18,7 @@ import com.mojang.brigadier.tree.RootCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -96,7 +96,7 @@ public class PermissionsManager implements IPermissionHandler
     {
         PermissionNode<Boolean> node = new PermissionNode<>(Perms.MODID, perm, PermissionTypes.BOOLEAN,
                 (player, playerUUID, context) -> level.matches(playerUUID));
-        node.setInformation(new TextComponent(perm), new TextComponent(description));
+        node.setInformation(Component.literal(perm), Component.literal(description));
 
         this.nodeMap.put(perm, node);
         DEFAULTS.put(perm, level);
