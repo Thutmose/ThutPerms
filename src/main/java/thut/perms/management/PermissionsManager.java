@@ -272,6 +272,14 @@ public class PermissionsManager implements IPermissionHandler
                 Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + perm);
             if (perm != null) return perm;
         }
+        else if (node.getType() == PermissionTypes.STRING)
+        {
+            @SuppressWarnings("unchecked")
+            T perm = (T) GroupManager.get_instance().getStringPerm(player.getUUID(), (PermissionNode<String>) node);
+            if (Perms.config.debug)
+                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + perm);
+            if (perm != null) return perm;
+        }
         return node.getDefaultResolver().resolve(player, player.getUUID(), context);
     }
 

@@ -148,4 +148,16 @@ public class GroupManager
         return Math.max(pInt, gInt);
     }
 
+    public String getStringPerm(final UUID id, final PermissionNode<String> perm)
+    {
+        final Group g = this.getPlayerGroup(id);
+        final Player player = this._manager.getPlayer(id);
+        String gS = g.getStringPerm(perm);
+        String pS = player.getStringPerm(perm);
+
+        if (gS == null && pS != null) return pS;
+        if (pS == null && gS != null) return gS;
+        
+        return pS;
+    }
 }

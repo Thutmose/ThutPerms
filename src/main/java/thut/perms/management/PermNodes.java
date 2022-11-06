@@ -52,11 +52,12 @@ public class PermNodes
     public static ServerPlayer testPlayer;
 
     private static final Map<String, PermissionNode<?>> NODES = Maps.newHashMap();
+    private static final Map<String, PermissionNode<?>> OTHERS = Maps.newHashMap();
 
     @SuppressWarnings("unchecked")
     public static PermissionNode<Boolean> getBooleanNode(String name)
     {
-        return (PermissionNode<Boolean>) NODES.get(name);
+        return (PermissionNode<Boolean>) NODES.getOrDefault(name, OTHERS.get(name));
     }
 
     private static final Pattern NODENAMEFIXER = Pattern.compile("(\\w+).(.*)");
@@ -68,9 +69,9 @@ public class PermNodes
         {
             for (PermissionNode<?> n : PermissionAPI.getRegisteredNodes())
             {
-                NODES.put(n.getNodeName(), n);
+                OTHERS.put(n.getNodeName(), n);
                 Matcher m = NODENAMEFIXER.matcher(n.getNodeName());
-                if (m.find()) NODES.put(m.group(2), n);
+                if (m.find()) OTHERS.put(m.group(2), n);
             }
             node = getBooleanNode(name);
         }

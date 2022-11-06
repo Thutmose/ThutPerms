@@ -27,10 +27,15 @@ public abstract class PermissionsHolder
     public Map<String, Integer> permNumbers = Maps.newHashMap();
 
     public Map<String, String> permStrings = Maps.newHashMap();
+    public Map<String, List<String>> permStringSets = Maps.newHashMap();
 
     public PermissionsHolder _parent;
     protected List<String> _whiteWildCards;
     protected List<String> _blackWildCards;
+
+    // This one has had the permStringSets merged into it.
+    protected Map<String, String> _permStrings = Maps.newHashMap();
+
     public boolean _init = false;
 
     private void init()
@@ -46,6 +51,27 @@ public abstract class PermissionsHolder
         for (final String s : this.bannedCommands)
             if (s.endsWith("*")) this._blackWildCards.add(s.substring(0, s.length() - 1));
             else if (s.startsWith("*")) this._blackWildCards.add(s.substring(1));
+
+        for (var entry : permStrings.entrySet())
+        {
+            _permStrings.compute(entry.getKey(), (key, oldValue) -> {
+                if (oldValue == null)
+                {
+                    return entry.getValue();
+                }
+                String value = oldValue;
+                value = entry.getValue() + "," + value;
+                return value;
+            });
+        }
+        for (var entry : permStringSets.entrySet())
+        {
+            _permStrings.compute(entry.getKey(), (key, value) -> {
+                if (value == null) value = "";
+                for (var str : entry.getValue()) value = str + "," + value;
+                return value;
+            });
+        }
     }
 
     public abstract void onUpdated(MinecraftServer server);
@@ -97,6 +123,12 @@ public abstract class PermissionsHolder
     public Integer getNumberPerm(final PermissionNode<Integer> permission)
     {
         return permNumbers.getOrDefault(permission.getNodeName(), null);
+    }
+
+    @Nullable
+    public String getStringPerm(final PermissionNode<String> permission)
+    {
+        return _permStrings.getOrDefault(permission.getNodeName(), null);
     }
 
     public boolean isAll()
