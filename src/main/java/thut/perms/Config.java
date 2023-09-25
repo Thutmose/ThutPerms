@@ -61,8 +61,8 @@ public class Config extends ConfigData
     public void sendFeedback(final CommandSourceStack target, final String key, final boolean log, final Object... args)
     {
         if (this.lang_overrides_map.containsKey(key))
-            target.sendSuccess(Component.literal(String.format(this.lang_overrides_map.get(key), args)), log);
-        else target.sendSuccess(Component.translatable(key, args), log);
+            target.sendSuccess(() -> Component.literal(String.format(this.lang_overrides_map.get(key), args)), log);
+        else target.sendSuccess(() -> Component.translatable(key, args), log);
     }
 
     public void sendError(final CommandSourceStack target, final String key, final Object... args)
