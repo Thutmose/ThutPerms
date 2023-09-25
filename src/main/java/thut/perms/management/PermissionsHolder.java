@@ -42,6 +42,7 @@ public abstract class PermissionsHolder
     {
         this._whiteWildCards = Lists.newArrayList();
         this._blackWildCards = Lists.newArrayList();
+        this._permStrings = Maps.newHashMap();
         if (this.allowedCommands == null) this.allowedCommands = Lists.newArrayList();
         if (this.bannedCommands == null) this.bannedCommands = Lists.newArrayList();
         this._init = true;
@@ -52,7 +53,7 @@ public abstract class PermissionsHolder
             if (s.endsWith("*")) this._blackWildCards.add(s.substring(0, s.length() - 1));
             else if (s.startsWith("*")) this._blackWildCards.add(s.substring(1));
 
-        for (var entry : permStrings.entrySet())
+        if (permStrings != null) for (var entry : permStrings.entrySet())
         {
             _permStrings.compute(entry.getKey(), (key, oldValue) -> {
                 if (oldValue == null)
@@ -64,7 +65,7 @@ public abstract class PermissionsHolder
                 return value;
             });
         }
-        for (var entry : permStringSets.entrySet())
+        if (permStringSets != null) for (var entry : permStringSets.entrySet())
         {
             _permStrings.compute(entry.getKey(), (key, value) -> {
                 if (value == null) value = "";
