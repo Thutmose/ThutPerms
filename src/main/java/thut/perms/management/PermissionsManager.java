@@ -23,12 +23,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.server.permission.handler.IPermissionHandler;
-import net.minecraftforge.server.permission.nodes.PermissionDynamicContext;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
-import net.minecraftforge.server.permission.nodes.PermissionTypes;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.server.permission.handler.IPermissionHandler;
+import net.neoforged.neoforge.server.permission.nodes.PermissionDynamicContext;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
 import thut.perms.Perms;
 import thut.perms.commands.AddGroup;
 import thut.perms.commands.CommandManager;
@@ -237,7 +237,7 @@ public class PermissionsManager implements IPermissionHandler
         });
     }
 
-    public static final ResourceLocation ID = new ResourceLocation("thutperms:manager");
+    public static final ResourceLocation ID = ResourceLocation.parse("thutperms:manager");
 
     @Override
     public ResourceLocation getIdentifier()

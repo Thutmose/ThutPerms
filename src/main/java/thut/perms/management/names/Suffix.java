@@ -4,14 +4,14 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 
 public class Suffix extends MutableComponent
 {
 
     public Suffix(final String name)
     {
-        super(new LiteralContents(name), Lists.newArrayList(), Style.EMPTY);
+        super(new PlainTextContents.LiteralContents(name), Lists.newArrayList(), Style.EMPTY);
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.Maps;
@@ -15,7 +16,6 @@ import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
 import thut.perms.Perms;
 
 public class PlayerManager

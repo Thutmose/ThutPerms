@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 
 public class Player extends PermissionsHolder
 {

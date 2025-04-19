@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 import thut.perms.management.PermNodes.DefaultPermissionLevel;
 
 public abstract class PermissionsHolder

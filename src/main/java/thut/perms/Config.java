@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 import thut.perms.config.Config.ConfigData;
 import thut.perms.config.Configure;
 import thut.perms.management.GroupManager;

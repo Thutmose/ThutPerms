@@ -6,6 +6,19 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.NeoForgeConfig;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
+import net.neoforged.neoforge.server.permission.handler.DefaultPermissionHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,22 +32,6 @@ import com.google.gson.GsonBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.ForgeConfig;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.network.NetworkConstants;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import net.minecraftforge.server.permission.events.PermissionGatherEvent;
-import net.minecraftforge.server.permission.handler.DefaultPermissionHandler;
 import thut.perms.management.Group;
 import thut.perms.management.GroupManager;
 import thut.perms.management.PermissionsManager;
@@ -67,7 +64,7 @@ public class Perms
         }
     };
 
-    public Perms()
+    public Perms(ModContainer container)
     {
         final Path dir = FMLPaths.CONFIGDIR.get().resolve(Perms.MODID);
         Perms.folder_players = dir.resolve("players").toFile();
@@ -82,13 +79,10 @@ public class Perms
         logger.addAppender(appender);
         appender.start();
 
-        thut.perms.config.Config.setupConfigs(Perms.config, Perms.MODID, Perms.MODID);
+        thut.perms.config.Config.setupConfigs(container, Perms.config, Perms.MODID, Perms.MODID);
 
-        MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.addListener(PermissionsManager::onRegisterCommands);
-
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class,
-                () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (ver, remote) -> true));
+        NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(PermissionsManager::onRegisterCommands);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -96,10 +90,10 @@ public class Perms
     {
         if (!Perms.config.disabled)
         {
-            ResourceLocation selectedPermissionHandler = new ResourceLocation(
-                    ForgeConfig.SERVER.permissionHandler.get());
+            ResourceLocation selectedPermissionHandler = ResourceLocation.parse(
+                    NeoForgeConfig.SERVER.permissionHandler.get());
             if (selectedPermissionHandler.equals(DefaultPermissionHandler.IDENTIFIER))
-                ForgeConfig.SERVER.permissionHandler.set(PermissionsManager.ID.toString());
+                NeoForgeConfig.SERVER.permissionHandler.set(PermissionsManager.ID.toString());
             event.addPermissionHandler(PermissionsManager.ID, PermissionsManager::new);
         }
     }
@@ -119,7 +113,7 @@ public class Perms
     }
 
     @SubscribeEvent
-    void logIn(final PlayerLoggedInEvent event)
+    void logIn(final PlayerEvent.PlayerLoggedInEvent event)
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
@@ -133,7 +127,7 @@ public class Perms
     }
 
     @SubscribeEvent
-    void logOut(final PlayerLoggedOutEvent event)
+    void logOut(final PlayerEvent.PlayerLoggedOutEvent event)
     {
         if (Perms.config.disabled) return;
         final PlayerManager manager = GroupManager.get_instance()._manager;
