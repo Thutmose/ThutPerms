@@ -64,7 +64,7 @@ public class PermissionsManager implements IPermissionHandler
 
     private static final Map<String, Object> DEFAULTS = Maps.newHashMap();
 
-    private Map<String, PermissionNode<?>> nodeMap = Maps.newHashMap();
+    private final Map<String, PermissionNode<?>> nodeMap = Maps.newHashMap();
     private Set<PermissionNode<?>> nodes;
 
     public PermissionsManager(Collection<PermissionNode<?>> permissions)
@@ -112,16 +112,16 @@ public class PermissionsManager implements IPermissionHandler
         if (!this.checkedPerm)
         {
             this.registerNode(perm, prevLevel, "auto generated perm for argument " + node.getName());
-            if (Perms.config.debug) Perms.LOGGER.debug("New perm needed for " + perm);
-            final Predicate<CommandSourceStack> req = (cs) -> {
-                return CommandManager.hasPerm(cs, "thutperms." + perm);
-            };
+            if (Perms.config.debug) Perms.LOGGER.debug("New perm needed for {}", perm);
+            final Predicate<CommandSourceStack> req = (cs) -> CommandManager.hasPerm(cs, "thutperms." + perm);
             try
             {
                 PermissionsManager.REQFIELD.set(node, req);
             }
             catch (IllegalArgumentException | IllegalAccessException e)
-            {}
+            {
+                Perms.LOGGER.error(e);
+            }
         }
         for (final CommandNode<CommandSourceStack> child : node.getChildren())
             this.wrap_children(child, perm, prevLevel);
@@ -142,9 +142,8 @@ public class PermissionsManager implements IPermissionHandler
             if (!this.lastPerm.endsWith(".")) this.lastPerm = this.lastPerm + ".";
             final String perm = this.lastPerm + node.getName();
             final DefaultPermissionLevel level = all ? DefaultPermissionLevel.ALL : DefaultPermissionLevel.OP;
-            if (node instanceof LiteralCommandNode<?>)
+            if (node instanceof LiteralCommandNode<?> literal)
             {
-                final LiteralCommandNode<?> literal = (LiteralCommandNode<?>) node;
                 final String rename = Perms.config.getRename(literal.getLiteral());
                 if (!rename.equals(literal.getLiteral())) try
                 {
@@ -163,9 +162,7 @@ public class PermissionsManager implements IPermissionHandler
             {
                 this.registerNode(perm, level, "auto generated perm for command /" + node.getName());
                 if (Perms.config.debug) Perms.LOGGER.debug("New perm needed for " + perm);
-                final Predicate<CommandSourceStack> req = (cs) -> {
-                    return CommandManager.hasPerm(cs, "thutperms." + perm);
-                };
+                final Predicate<CommandSourceStack> req = (cs) -> CommandManager.hasPerm(cs, "thutperms." + perm);
                 try
                 {
                     PermissionsManager.REQFIELD.set(node, req);
@@ -221,17 +218,18 @@ public class PermissionsManager implements IPermissionHandler
                 .newHashMap();
 
         // Then assign alternates.
-        for (final CommandNode<CommandSourceStack> node : root.getChildren()) if (node instanceof LiteralCommandNode<?>)
-        {
-            final LiteralCommandNode<?> literal = (LiteralCommandNode<?>) node;
-            final java.util.List<LiteralArgumentBuilder<CommandSourceStack>> builders = Lists.newArrayList();
-            for (final String s : Perms.config.getAlternates(literal.getLiteral()))
+        for (final CommandNode<CommandSourceStack> node : root.getChildren())
+            if (node instanceof LiteralCommandNode<?> literal)
             {
-                if (Perms.config.debug) Perms.LOGGER.info("Generating Alternate {} for {}", s, literal.getLiteral());
-                builders.add(Commands.literal(s).requires(node.getRequirement()).redirect(node));
+                final java.util.List<LiteralArgumentBuilder<CommandSourceStack>> builders = Lists.newArrayList();
+                for (final String s : Perms.config.getAlternates(literal.getLiteral()))
+                {
+                    if (Perms.config.debug)
+                        Perms.LOGGER.info("Generating Alternate {} for {}", s, literal.getLiteral());
+                    builders.add(Commands.literal(s).requires(node.getRequirement()).redirect(node));
+                }
+                if (!builders.isEmpty()) newNodes.put(node, builders);
             }
-            if (!builders.isEmpty()) newNodes.put(node, builders);
-        }
         newNodes.forEach((node, list) -> {
             for (final LiteralArgumentBuilder<CommandSourceStack> builder : list) commandDispatcher.register(builder);
         });
@@ -261,7 +259,8 @@ public class PermissionsManager implements IPermissionHandler
             final T value = (T) GroupManager.get_instance().hasPermission(player.getUUID(),
                     (PermissionNode<Boolean>) node);
             if (Perms.config.debug)
-                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + value);
+                Perms.LOGGER.info("permnode: {} {}[{}] {}", node.getNodeName(), player.getGameProfile().getId(),
+                        player.getGameProfile().getName(), value);
             return value;
         }
         else if (node.getType() == PermissionTypes.INTEGER)
@@ -269,7 +268,8 @@ public class PermissionsManager implements IPermissionHandler
             @SuppressWarnings("unchecked")
             T perm = (T) GroupManager.get_instance().getIntPerm(player.getUUID(), (PermissionNode<Integer>) node);
             if (Perms.config.debug)
-                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + perm);
+                Perms.LOGGER.info("permnode: {} {}[{}] {}", node.getNodeName(), player.getGameProfile().getId(),
+                        player.getGameProfile().getName(), perm);
             if (perm != null) return perm;
         }
         else if (node.getType() == PermissionTypes.STRING)
@@ -277,7 +277,8 @@ public class PermissionsManager implements IPermissionHandler
             @SuppressWarnings("unchecked")
             T perm = (T) GroupManager.get_instance().getStringPerm(player.getUUID(), (PermissionNode<String>) node);
             if (Perms.config.debug)
-                Perms.LOGGER.info("permnode: " + node.getNodeName() + " " + player.getGameProfile() + " " + perm);
+                Perms.LOGGER.info("permnode: {} {}[{}] {}", node.getNodeName(), player.getGameProfile().getId(),
+                        player.getGameProfile().getName(), perm);
             if (perm != null) return perm;
         }
         return node.getDefaultResolver().resolve(player, player.getUUID(), context);

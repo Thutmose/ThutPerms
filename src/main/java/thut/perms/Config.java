@@ -121,13 +121,11 @@ public class Config extends ConfigData
 
     public String getRename(final String old)
     {
-        if (this.command_map.containsKey(old)) return this.command_map.get(old);
-        else return old;
+        return this.command_map.getOrDefault(old, old);
     }
 
     public List<String> getAlternates(final String old)
     {
-        if (this.command_alternates_map.containsKey(old)) return this.command_alternates_map.get(old);
-        else return Collections.emptyList();
+        return this.command_alternates_map.getOrDefault(old, Collections.emptyList());
     }
 }

@@ -59,8 +59,7 @@ public class Perms
         @Override
         public boolean shouldSkipClass(final Class<?> clazz)
         {
-            if (clazz.getName().contains("net.minecraft")) return true;
-            return false;
+            return clazz.getName().contains("net.minecraft");
         }
     };
 
@@ -153,7 +152,6 @@ public class Perms
                 Perms.LOGGER.error("Error reading groups {}", json);
                 Perms.LOGGER.error(e);
             }
-            return;
         }
         else
         {

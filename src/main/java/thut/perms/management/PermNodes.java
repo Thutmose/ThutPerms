@@ -35,7 +35,7 @@ public class PermNodes
             if (this == NONE) return false;
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             Optional<GameProfile> profile = server != null ? server.getProfileCache().get(player) : Optional.empty();
-            boolean op = false;
+            boolean op;
             if (profile.isPresent())
             {
                 op = server.getPlayerList().isOp(profile.get());
@@ -44,7 +44,7 @@ public class PermNodes
             {
                 op = server.getPlayerList().isOp(testProfile);
             }
-            return op ? true : this == ALL;
+            return op || this == ALL;
         }
     }
 

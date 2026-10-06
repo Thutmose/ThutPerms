@@ -117,7 +117,9 @@ public class GroupManager
         final Group ret = this._groupIDMap.get(id);
         if (ret == null)
         {
-            if (Perms.getServer().getPlayerList().getOps().get(new GameProfile(id, null)) != null) return this.mods;
+            var profileOpt = Perms.getServer().getProfileCache().get(id);
+            if (profileOpt.isPresent() && Perms.getServer().getPlayerList().getOps().get(profileOpt.get()) != null)
+                return this.mods;
             return this.initial;
         }
         return ret;
@@ -127,7 +129,7 @@ public class GroupManager
     {
         final Group g = this.getPlayerGroup(id);
         final Player player = this._manager.getPlayer(id);
-        final boolean canPlayerUse = player != null ? player.hasPermission(perm) : false;
+        final boolean canPlayerUse = player != null && player.hasPermission(perm);
 
         // Check if that player is specifically denied the perm.
         if (player != null && player.isDenied(perm)) return false;

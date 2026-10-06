@@ -13,7 +13,6 @@ import org.apache.commons.io.FileUtils;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.authlib.GameProfile;
 
 import net.minecraft.server.level.ServerPlayer;
 import thut.perms.Perms;
@@ -64,7 +63,8 @@ public class PlayerManager
         final Group ret = this._manager._groupIDMap.get(id);
         if (ret == null)
         {
-            if (Perms.getServer().getPlayerList().getOps().get(new GameProfile(id, null)) != null)
+            var profileOpt = Perms.getServer().getProfileCache().get(id);
+            if (profileOpt.isPresent() && Perms.getServer().getPlayerList().getOps().get(profileOpt.get()) != null)
                 return this._manager.mods;
             return this._manager.initial;
         }
@@ -75,7 +75,7 @@ public class PlayerManager
     {
         final Group g = this.getPlayerGroup(id);
         final Player player = this._playerIDMap.get(id);
-        final boolean canPlayerUse = player != null ? player.hasPermission(perm) : false;
+        final boolean canPlayerUse = player != null && player.hasPermission(perm);
 
         // Check if that player is specifically denied the perm.
         if (player != null && player.isDenied(perm)) return false;
